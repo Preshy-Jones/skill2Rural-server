@@ -4,6 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from 'src/prisma.service';
 import { UserRepository } from './user.repository';
 import * as bcrypt from 'bcrypt';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -16,9 +17,12 @@ export class UserService {
     try {
       const { email, password } = createUserDto;
 
-      const user = this.userRepository.findOneByEmail(email);
+      const user = await this.userRepository.findOneByEmail(email);
 
-      if (!user) {
+      console.log(user, 'user');
+
+      //check if user already exists
+      if (user) {
         throw new HttpException(
           'User with that email already exists',
           HttpStatus.CONFLICT,
@@ -29,9 +33,12 @@ export class UserService {
 
       createUserDto.password = hashedPassword;
 
-      return this.prisma.user.create({
-        data: createUserDto,
-      });
+      const savedUser = await this.userRepository.create(createUserDto);
+
+      return {
+        message: 'User created successfully',
+        data: savedUser,
+      };
     } catch (error) {
       throw error;
     }
@@ -45,12 +52,18 @@ export class UserService {
     });
   }
 
-  findAll() {
-    return `This action returns all user`;
+  //update user
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    return this.userRepository.update({
+      where: { id },
+      data: updateUserDto,
+    });
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} user`;
+    return this.userRepository.findOne({
+      where: { id },
+    });
   }
 
   // update(id: number, updateUserDto: UpdateUserDto) {

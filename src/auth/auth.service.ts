@@ -11,11 +11,13 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   loginUser(loginUserDto: LoginUserDto) {
+    console.log('dhdhdhh');
+
     return {
       message: 'Login successful',
       data: {
-        loginUserDto,
-        token: this.jwtService.sign(loginUserDto),
+        user: loginUserDto,
+        accessToken: this.jwtService.sign(loginUserDto),
       },
     };
   }
