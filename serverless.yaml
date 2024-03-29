@@ -1,0 +1,29 @@
+service: skill2rural-backend
+
+useDotenv: true
+
+plugins:
+  - serverless-offline
+
+frameworkVersion: '>=1.72.0'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+
+functions:
+  nestApp:
+    handler: dist/serverless.handler
+    events:
+      - http:
+          path: /
+          method: ANY
+      - http:
+          path: /{proxy+}
+          method: ANY
+
+package:
+  exclude:
+    - node_modules/**
+    - .gitignore
+    - .git/**
