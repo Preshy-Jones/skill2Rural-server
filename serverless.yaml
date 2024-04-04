@@ -4,12 +4,13 @@ useDotenv: true
 
 plugins:
   - serverless-offline
+  - serverless-dotenv-plugin
 
 frameworkVersion: '>=1.72.0'
 
 provider:
   name: aws
-  runtime: nodejs14.x
+  runtime: nodejs18.x
 
 functions:
   nestApp:
