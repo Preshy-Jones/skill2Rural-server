@@ -13,6 +13,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt-auth.guard';
+import { CreateEducatorDto } from './dto/create-educator.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
@@ -24,7 +25,8 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: 'The record has been successfully created.',
-  })
+  
+})
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiBody({
     type: CreateUserDto,
@@ -32,6 +34,16 @@ export class UserController {
   })
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
+  }
+
+  @ApiTags('Register Educator')
+  @ApiResponse({
+    status: 201,
+    description: 'The record has been successfully created.',
+  })
+  @Post('educator')
+  createEducator(@Body() createEducatorDto: CreateEducatorDto) {
+    return this.userService.create(createEducatorDto);
   }
 
   @Patch(':id')

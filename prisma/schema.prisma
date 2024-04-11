@@ -16,6 +16,11 @@ model User {
   name     String?
   email    String  @unique
   password String?
+  type    Type     @default(STUDENT)
+  organisation String?
+  role String?
+  no_of_students_to_reach Int?
+  work_with_maginalized_populations Boolean?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -32,4 +37,9 @@ model Educators {
   work_with_maginalized_populations Boolean?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+enum Type {
+  STUDENT
+  EDUCATOR
 }
