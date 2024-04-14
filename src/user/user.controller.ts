@@ -25,8 +25,7 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: 'The record has been successfully created.',
-  
-})
+  })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
   @ApiBody({
     type: CreateUserDto,

@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 enum UserType {
@@ -67,6 +67,7 @@ export class CreateEducatorDto {
     example: 100,
   })
   @IsNotEmpty()
+  @IsNumber()
   no_of_students_to_reach: number;
 
   @ApiProperty({
