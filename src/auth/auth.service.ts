@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { LoginUserDto } from './dto/login-user.dto';
-import * as bcrypt from 'bcryptjs';
-import { UserService } from 'src/user/user.service';
-import { JwtService } from '@nestjs/jwt';
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { LoginUserDto } from "./dto/login-user.dto";
+import * as bcrypt from "bcryptjs";
+import { UserService } from "src/user/user.service";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AuthService {
@@ -11,13 +11,15 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   loginUser(loginUserDto: LoginUserDto) {
-    console.log('dhdhdhh');
+    console.log("dhdhdhh");
 
     return {
-      message: 'Login successful',
+      message: "Login successful",
       data: {
         user: loginUserDto,
-        accessToken: this.jwtService.sign(loginUserDto),
+        accessToken: this.jwtService.sign(loginUserDto, {
+          expiresIn: "1d",
+        }),
       },
     };
   }
@@ -26,14 +28,14 @@ export class AuthService {
       const user = await this.userService.findByEmail(email);
       if (!user) {
         throw new HttpException(
-          'No user with that email exists in our records',
+          "No user with that email exists in our records",
           HttpStatus.NOT_FOUND,
         );
       }
 
       const isMatch = await bcrypt.compare(password, user.password);
       if (!isMatch) {
-        throw new HttpException('Invalid Password', HttpStatus.UNAUTHORIZED);
+        throw new HttpException("Invalid Password", HttpStatus.UNAUTHORIZED);
       }
 
       return {
