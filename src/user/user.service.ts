@@ -64,10 +64,14 @@ export class UserService {
 
   //update user
   async update(id: number, updateUserDto: UpdateUserDto) {
-    return this.userRepository.update({
-      where: { id },
-      data: updateUserDto,
-    });
+    try {
+      return this.userRepository.update({
+        where: { id },
+        data: updateUserDto,
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 
   findOne(id: number) {
@@ -76,12 +80,16 @@ export class UserService {
     });
   }
 
-  // update(id: number, updateUserDto: UpdateUserDto) {
-  //   return `This action updates a #${id} user`;
-  // }
-
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async findAllUsers() {
+    try {
+      return this.userRepository.findAll();
+    } catch (error) {
+      throw error;
+    }
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {

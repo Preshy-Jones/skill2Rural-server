@@ -105,4 +105,17 @@ export class UserController {
   ) {
     return this.userService.resetPassword(token, resetPasswordDto);
   }
+
+  //get all users
+  @Get("/all")
+  @ApiTags("Get All Users")
+  @ApiResponse({
+    status: 200,
+    description: "The records have been successfully retrieved.",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden." })
+  @ApiBearerAuth()
+  findAll() {
+    return this.userService.findAllUsers();
+  }
 }

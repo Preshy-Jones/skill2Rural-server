@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { Course, Prisma } from "@prisma/client";
+import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class CourseRepository {
@@ -27,11 +28,9 @@ export class CourseRepository {
   }
 
   async update(params: {
-    where: {
-      id: number;
-    };
-    data: any;
-  }) {
+    where: Prisma.CourseWhereUniqueInput;
+    data: Prisma.CourseUpdateInput;
+  }): Promise<Course | null> {
     const { where, data } = params;
     return this.prisma.course.update({
       data,

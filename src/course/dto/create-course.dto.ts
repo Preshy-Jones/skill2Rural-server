@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from "@nestjs/swagger";
 
 export class CreateCourseDto {
   // model Course {
@@ -13,30 +13,30 @@ export class CreateCourseDto {
   // }
 
   @ApiProperty({
-    description: 'The title of the course',
+    description: "The title of the course",
     type: String,
-    example: 'Introduction to GraphQL',
+    example: "Introduction to GraphQL",
   })
   title: string;
 
   @ApiProperty({
-    description: 'The description of the course',
+    description: "The description of the course",
     type: String,
-    example: 'Learn the basics of GraphQL',
+    example: "Learn the basics of GraphQL",
   })
   description: string;
 
   @ApiProperty({
-    description: 'The thumbnail image of the course',
+    description: "The thumbnail image of the course",
     type: String,
-    example: 'https://example.com/thumbnail.jpg',
+    example: "https://example.com/thumbnail.jpg",
   })
   thumbnail_image: string;
 
   @ApiProperty({
-    description: 'The video url of the course',
+    description: "The video url of the course",
     type: String,
-    example: 'https://example.com/video.mp4',
+    example: "https://example.com/video.mp4",
   })
   video_url: string;
 }
