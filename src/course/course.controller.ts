@@ -14,6 +14,7 @@ import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AddCourseReviewDto } from "./dto/add-course-review.dto";
 import { AddQuestionDto } from "./dto/add-question.dto";
+import { SubmitQuizDto } from "./dto/submit-quiz.dto";
 
 @Controller("course")
 export class CourseController {
@@ -146,7 +147,7 @@ export class CourseController {
     description: "Json structure for quiz object",
   })
   @ApiBearerAuth()
-  submitQuiz(@Param("courseId") courseId: string, @Body() data: any) {
+  submitQuiz(@Param("courseId") courseId: string, @Body() data: SubmitQuizDto) {
     return this.courseService.submitQuiz(+courseId, data);
   }
 }

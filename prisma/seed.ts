@@ -36,7 +36,7 @@ const dummyVideos = [
   {
     id: "3",
     title: "For Bigger Blazes",
-    thumbnailUrl: "https://i.ytimg.com/vi/Dr9C2oswZfA/maxresdefault.jpg",
+    thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
     duration: "8:18",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
@@ -83,7 +83,7 @@ const dummyVideos = [
   {
     id: "6",
     title: "For Bigger Blazes",
-    thumbnailUrl: "https://i.ytimg.com/vi/Dr9C2oswZfA/maxresdefault.jpg",
+    thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
     duration: "8:18",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
