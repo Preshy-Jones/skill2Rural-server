@@ -6,6 +6,8 @@ import { CourseRepository } from "./repositories/course.repository";
 import { successResponse } from "src/common/utils";
 import { CourseReviewRepository } from "./repositories/review.repositories";
 import { AddCourseReviewDto } from "./dto/add-course-review.dto";
+import { AddQuestionDto } from "./dto/add-question.dto";
+import { CourseQuestionRepository } from "./repositories/question.repository";
 
 @Injectable()
 export class CourseService {
@@ -13,6 +15,7 @@ export class CourseService {
     private prisma: PrismaService,
     private courseRepository: CourseRepository,
     private courseReviewRepository: CourseReviewRepository,
+    private courseQuestionRepository: CourseQuestionRepository,
   ) {}
 
   create(createCourseDto: CreateCourseDto) {
@@ -121,9 +124,9 @@ export class CourseService {
       }
 
       // get the average rating
-      const averageRating =
-        reviews.reduce((acc, review) => acc + review.rating, 0) /
-        reviews.length;
+      const averageRating = (
+        reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
+      ).toFixed(2);
 
       // get percentage of the number of each rating over the total number of reviews
       const reviewsGroupedByRating =
@@ -167,4 +170,53 @@ export class CourseService {
       throw error;
     }
   }
+
+  async addNewQuestion(courseId: number, data: AddQuestionDto) {
+    try {
+      // check if course exists
+      const course = await this.courseRepository.findOne({
+        where: { id: courseId },
+      });
+
+      if (!course) {
+        throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
+      }
+
+      const question = await this.courseQuestionRepository.create({
+        ...data,
+        course: {
+          connect: {
+            id: courseId,
+          },
+        },
+      });
+
+      return successResponse(question, "Question added successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getQuestions(courseId: number) {
+    try {
+      // check if course exists
+      const course = await this.courseRepository.findOne({
+        where: { id: courseId },
+      });
+
+      if (!course) {
+        throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
+      }
+
+      const questions = await this.courseQuestionRepository.courseQuestion({
+        courseId,
+      });
+
+      return successResponse(questions, "Questions retrieved successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async submitQuiz(courseId: number, data: any) {}
 }

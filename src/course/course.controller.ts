@@ -13,6 +13,7 @@ import { CourseService } from "./course.service";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AddCourseReviewDto } from "./dto/add-course-review.dto";
+import { AddQuestionDto } from "./dto/add-question.dto";
 
 @Controller("course")
 export class CourseController {
@@ -102,5 +103,50 @@ export class CourseController {
   ) {
     const userId = req.user.id;
     return this.courseService.addCourseReview(+courseId, userId, data);
+  }
+
+  @Post(":courseId/questions")
+  @ApiTags("Add New Question")
+  @ApiResponse({
+    status: 201,
+    description: "The record has been successfully created.",
+  })
+  @ApiBody({
+    type: AddQuestionDto,
+    description: "Json structure for question object",
+  })
+  @ApiBearerAuth()
+  addNewQuestion(
+    @Param("courseId") courseId: string,
+    @Body() data: AddQuestionDto,
+  ) {
+    return this.courseService.addNewQuestion(+courseId, data);
+  }
+
+  @Get(":courseId/questions")
+  @ApiTags("Get Questions")
+  @ApiResponse({
+    status: 200,
+    description: "The records have been successfully retrieved.",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden" })
+  @ApiBearerAuth()
+  getQuestions(@Param("courseId") courseId: string) {
+    return this.courseService.getQuestions(+courseId);
+  }
+
+  //submit quiz
+  @Post(":courseId/quiz")
+  @ApiTags("Submit Quiz")
+  @ApiResponse({
+    status: 201,
+    description: "The record has been successfully created.",
+  })
+  @ApiBody({
+    description: "Json structure for quiz object",
+  })
+  @ApiBearerAuth()
+  submitQuiz(@Param("courseId") courseId: string, @Body() data: any) {
+    return this.courseService.submitQuiz(+courseId, data);
   }
 }

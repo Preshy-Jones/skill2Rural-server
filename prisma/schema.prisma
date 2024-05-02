@@ -22,6 +22,7 @@ model User {
   updatedAt                         DateTime         @updatedAt
   CourseProgress                    CourseProgress[]
   CourseReview                      CourseReview[]
+  Quiz                              Quiz[]
 }
 
 model Educator {
@@ -52,6 +53,8 @@ model Course {
   updatedAt   DateTime         @updatedAt
   reviews     CourseReview[]
   progress    CourseProgress[]
+  questions   CourseQuestion[]
+  Quiz        Quiz[]
 }
 
 model CourseProgress {
@@ -77,11 +80,40 @@ model CourseReview {
   userId    Int
 }
 
+model CourseQuestion {
+  id        Int      @id @default(autoincrement())
+  question  String
+  answer    Answer
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  Int
+}
+
 model AccountRecovery {
   id        Int      @id @default(autoincrement())
   userId    Int
   email     String
   token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Answer {
+  TRUE
+  FALSE
+}
+
+
+model Quiz {
+  id        Int      @id @default(autoincrement())
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  no_of_questions Int
+  no_of_correct_answers Int
+  gradeInPercentage Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

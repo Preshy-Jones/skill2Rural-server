@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { IsNotEmpty, IsNumber, Min } from "class-validator";
 
 export class AddCourseReviewDto {
   @ApiProperty({
@@ -9,6 +9,7 @@ export class AddCourseReviewDto {
   })
   @IsNumber()
   @IsNotEmpty()
+  @Min(1)
   rating: number;
 
   @ApiProperty({
