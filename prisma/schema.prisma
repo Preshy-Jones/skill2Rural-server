@@ -23,6 +23,7 @@ model User {
   CourseProgress                    CourseProgress[]
   CourseReview                      CourseReview[]
   Quiz                              Quiz[]
+  Certificate                       Certificate[]
 }
 
 model Educator {
@@ -55,6 +56,7 @@ model Course {
   progress    CourseProgress[]
   questions   CourseQuestion[]
   Quiz        Quiz[]
+  Certificate Certificate[]
 }
 
 model CourseProgress {
@@ -113,6 +115,18 @@ model Quiz {
   userId    Int
   no_of_questions Int
   no_of_correct_answers Int
+  gradeInPercentage Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
+model Certificate {
+  id        Int      @id @default(autoincrement())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  course    Course   @relation(fields: [courseId], references: [id])
+  courseId  Int
   gradeInPercentage Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

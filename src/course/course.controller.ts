@@ -14,7 +14,7 @@ import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AddCourseReviewDto } from "./dto/add-course-review.dto";
 import { AddQuestionDto } from "./dto/add-question.dto";
-import { SubmitQuizDto } from "./dto/submit-quiz.dto";
+import { CreateCertificateDto } from "./dto/create-certificate.dto";
 
 @Controller("course")
 export class CourseController {
@@ -136,18 +136,64 @@ export class CourseController {
     return this.courseService.getQuestions(+courseId);
   }
 
-  //submit quiz
-  @Post(":courseId/quiz")
-  @ApiTags("Submit Quiz")
+  // //submit quiz
+  // @Post(":courseId/quiz")
+  // @ApiTags("Submit Quiz")
+  // @ApiResponse({
+  //   status: 201,
+  //   description: "The record has been successfully created.",
+  // })
+  // @ApiBody({
+  //   description: "Json structure for quiz object",
+  // })
+  // @ApiBearerAuth()
+  // submitQuiz(@Param("courseId") courseId: string, @Body() data: SubmitQuizDto) {
+  //   return this.courseService.submitQuiz(+courseId, data);
+  // }
+
+  // Get User's Certificates
+  @Get("certificate")
+  @ApiTags("Get User Certificates")
+  @ApiResponse({
+    status: 200,
+    description: "The records have been successfully retrieved.",
+  })
+  @ApiBearerAuth()
+  getUserCertificates(@Request() req) {
+    const userId = req.user.id;
+    return this.courseService.getUserCertificates(userId);
+  }
+
+  // Get User's course certificate
+  @Get(":courseId/certificate")
+  @ApiTags("Get User Course Certificate")
+  @ApiResponse({
+    status: 200,
+    description: "The record has been successfully retrieved.",
+  })
+  @ApiBearerAuth()
+  getUserCourseCertificate(
+    @Param("courseId") courseId: string,
+    @Request() req,
+  ) {
+    const userId = req.user.id;
+    return this.courseService.getUserCertificate(+courseId, userId);
+  }
+
+  //create certificate
+  @Post(":courseId/certificate")
+  @ApiTags("Create Certificate")
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
   })
-  @ApiBody({
-    description: "Json structure for quiz object",
-  })
   @ApiBearerAuth()
-  submitQuiz(@Param("courseId") courseId: string, @Body() data: SubmitQuizDto) {
-    return this.courseService.submitQuiz(+courseId, data);
+  createCertificate(
+    @Param("courseId") courseId: string,
+    @Request() req,
+    @Body() data: CreateCertificateDto,
+  ) {
+    const userId = req.user.id;
+    return this.courseService.createCertificate(+courseId, userId, data);
   }
 }

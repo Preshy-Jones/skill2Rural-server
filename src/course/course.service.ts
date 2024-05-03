@@ -8,6 +8,9 @@ import { CourseReviewRepository } from "./repositories/review.repositories";
 import { AddCourseReviewDto } from "./dto/add-course-review.dto";
 import { AddQuestionDto } from "./dto/add-question.dto";
 import { CourseQuestionRepository } from "./repositories/question.repository";
+import { QuizRepository } from "./repositories/quiz.repository.dto";
+import { CreateCertificateDto } from "./dto/create-certificate.dto";
+import { CertificateRepository } from "./repositories/certificate.repository";
 
 @Injectable()
 export class CourseService {
@@ -16,6 +19,8 @@ export class CourseService {
     private courseRepository: CourseRepository,
     private courseReviewRepository: CourseReviewRepository,
     private courseQuestionRepository: CourseQuestionRepository,
+    private quizRepository: QuizRepository,
+    private certificateRepository: CertificateRepository,
   ) {}
 
   create(createCourseDto: CreateCourseDto) {
@@ -218,5 +223,115 @@ export class CourseService {
     }
   }
 
-  async submitQuiz(courseId: number, data: any) {}
+  // async submitQuiz(courseId: number, data: SubmitQuizDto) {
+  //   try {
+  //     const course = await this.courseRepository.findOne({
+  //       where: { id: courseId },
+  //     });
+
+  //     if (!course) {
+  //       throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
+  //     }
+
+  //     // check if user has already submitted the quiz
+  //     const userQuiz = await this.quizRepository.quiz(
+  //       {
+  //         courseId,
+  //         userId: data.userId,
+  //       },
+  //       {
+  //         user: true,
+  //       },
+  //     );
+
+  //     if (userQuiz.length > 0) {
+  //       throw new HttpException(
+  //         "You have already submitted the quiz",
+  //         HttpStatus.CONFLICT,
+  //       );
+  //     }
+
+  //     const quiz = await this.quizRepository.create({
+  //       ...data,
+  //       course: {
+  //         connect: {
+  //           id: courseId,
+  //         },
+  //       },
+  //     });
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
+
+  async createCertificate(
+    courseId: number,
+    userId: number,
+    createCertificateDto: CreateCertificateDto,
+  ) {
+    try {
+      const course = await this.courseRepository.findOne({
+        where: { id: courseId },
+      });
+
+      if (!course) {
+        throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
+      }
+
+      const certificate = await this.certificateRepository.create({
+        ...createCertificateDto,
+        course: {
+          connect: {
+            id: courseId,
+          },
+        },
+        user: {
+          connect: {
+            id: userId,
+          },
+        },
+      });
+
+      return successResponse(certificate, "Certificate created successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUserCertificates(userId: number) {
+    try {
+      const certificates = await this.certificateRepository.certificate({
+        userId,
+      });
+
+      return successResponse(
+        certificates,
+        "Certificates retrieved successfully",
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUserCertificate(courseId: number, userId: number) {
+    try {
+      const certificate = await this.certificateRepository.certificate(
+        {
+          courseId,
+          userId,
+        },
+        {
+          course: true,
+        },
+      );
+
+      if (certificate.length === 0) {
+        throw new HttpException("Certificate not found", HttpStatus.NOT_FOUND);
+      }
+
+      return successResponse(certificate, "Certificate retrieved successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
 }
