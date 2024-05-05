@@ -85,7 +85,9 @@ model CourseReview {
 model CourseQuestion {
   id        Int      @id @default(autoincrement())
   question  String
-  answer    Answer
+  answer    Int 
+  point     Int
+  options   String[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   course    Course   @relation(fields: [courseId], references: [id])
@@ -101,10 +103,6 @@ model AccountRecovery {
   updatedAt DateTime @updatedAt
 }
 
-enum Answer {
-  TRUE
-  FALSE
-}
 
 
 model Quiz {

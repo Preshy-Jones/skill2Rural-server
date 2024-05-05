@@ -1,10 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty } from "class-validator";
-
-enum QuestionAnswer {
-  TRUE = "TRUE",
-  FALSE = "FALSE",
-}
+import { IsBoolean, IsNotEmpty, IsNumber } from "class-validator";
 
 export class AddQuestionDto {
   @ApiProperty({
@@ -26,9 +21,27 @@ export class AddQuestionDto {
   @ApiProperty({
     description: "The correct answer to the question",
     type: String,
-    example: "TRUE",
+    example: true,
   })
   @IsNotEmpty()
-  @IsEnum(QuestionAnswer)
-  answer: QuestionAnswer;
+  @IsBoolean()
+  // @IsEnum(QuestionAnswer)
+  answer: number;
+
+  @ApiProperty({
+    description: "The point for the question",
+    type: Number,
+    example: 2,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  point: number;
+
+  @ApiProperty({
+    description: "The options for the question",
+    type: [String],
+    example: ["Abuja", "Lagos", "Kano", "Ibadan"],
+  })
+  @IsNotEmpty()
+  options: string[];
 }
