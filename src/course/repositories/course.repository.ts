@@ -12,18 +12,20 @@ export class CourseRepository {
     });
   }
 
-  async findAll() {
-    return this.prisma.course.findMany();
+  async course(where: Prisma.CourseWhereInput, include?: Prisma.CourseInclude) {
+    return this.prisma.course.findMany({
+      where,
+      ...(include && { include }),
+    });
   }
 
-  async findOne(params: {
-    where: {
-      id: number;
-    };
-  }) {
-    const { where } = params;
+  async findOne(
+    where: Prisma.CourseWhereUniqueInput,
+    include?: Prisma.CourseInclude,
+  ) {
     return this.prisma.course.findUnique({
       where,
+      ...(include && { include }),
     });
   }
 

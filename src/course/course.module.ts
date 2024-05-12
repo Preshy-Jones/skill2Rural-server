@@ -19,5 +19,12 @@ import { CertificateRepository } from "./repositories/certificate.repository";
     QuizRepository,
     CertificateRepository,
   ],
+  exports: [
+    CourseService,
+    CourseRepository,
+    CourseQuestionRepository,
+    QuizRepository,
+    CertificateRepository,
+  ],
 })
 export class CourseModule {}

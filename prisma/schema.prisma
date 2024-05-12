@@ -52,6 +52,7 @@ model Course {
   video_url   String
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+  duration    Int
   reviews     CourseReview[]
   progress    CourseProgress[]
   questions   CourseQuestion[]
@@ -61,7 +62,8 @@ model Course {
 
 model CourseProgress {
   id        Int      @id @default(autoincrement())
-  progress  Int
+  progressPercentage  Int
+  lastWatchedTime    Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   course    Course   @relation(fields: [courseId], references: [id])
@@ -129,3 +131,7 @@ model Certificate {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+
+
+

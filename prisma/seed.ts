@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { faker } from "@faker-js/faker";
+// import { faker } from "@faker-js/faker";
 
 const dummyVideos = [
   {
@@ -7,7 +7,7 @@ const dummyVideos = [
     title: "Big Buck Bunny",
     thumbnailUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/1200px-Big_Buck_Bunny_thumbnail_vlc.png",
-    duration: "8:18",
+    duration: "9:56",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
     author: "Vlc Media Player",
@@ -22,7 +22,7 @@ const dummyVideos = [
     id: "2",
     title: "The first Blender Open Movie from 2006",
     thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-    duration: "12:18",
+    duration: "10:53",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
     author: "Blender Inc.",
@@ -37,7 +37,7 @@ const dummyVideos = [
     id: "3",
     title: "For Bigger Blazes",
     thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-    duration: "8:18",
+    duration: "0:15",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
     author: "T-Series Regional",
@@ -53,7 +53,7 @@ const dummyVideos = [
     title: "For Bigger Escape",
     thumbnailUrl:
       "https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg",
-    duration: "8:18",
+    duration: "0:15",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
     author: "T-Series Regional",
@@ -69,7 +69,7 @@ const dummyVideos = [
     title: "Big Buck Bunny",
     thumbnailUrl:
       "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/1200px-Big_Buck_Bunny_thumbnail_vlc.png",
-    duration: "8:18",
+    duration: "9:56",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
     author: "Vlc Media Player",
@@ -84,7 +84,7 @@ const dummyVideos = [
     id: "6",
     title: "For Bigger Blazes",
     thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-    duration: "8:18",
+    duration: "0:15",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
     author: "T-Series Regional",
@@ -100,7 +100,7 @@ const dummyVideos = [
     title: "For Bigger Escape",
     thumbnailUrl:
       "https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg",
-    duration: "8:18",
+    duration: "0:15",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
     author: "T-Series Regional",
@@ -115,7 +115,7 @@ const dummyVideos = [
     id: "8",
     title: "The first Blender Open Movie from 2006",
     thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-    duration: "12:18",
+    duration: "10:53",
     uploadTime: "May 9, 2011",
     views: "24,969,123",
     author: "Blender Inc.",
@@ -130,16 +130,22 @@ const dummyVideos = [
 
 const prisma = new PrismaClient();
 async function main() {
+  console.log("Seeding database");
+
   //seed dummy courses
   for (let i = 0; i < 20; i++) {
     const randomVideo =
       dummyVideos[Math.floor(Math.random() * dummyVideos.length)];
+    const duration = convertTimeToSeconds(randomVideo.duration);
+    console.log(duration, "duration");
+
     await prisma.course.create({
       data: {
-        title: faker.lorem.words(3),
-        description: faker.lorem.words(10),
+        title: randomVideo.title,
+        description: randomVideo.description,
         video_url: randomVideo.videoUrl,
         thumbnail_image: randomVideo.thumbnailUrl,
+        duration: convertTimeToSeconds(randomVideo.duration),
       },
     });
   }
@@ -153,3 +159,11 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+
+//a functioM to convert time in the format of mm:ss to seconds
+function convertTimeToSeconds(time) {
+  const [minutes, seconds] = time.split(":");
+  return parseInt(minutes) * 60 + parseInt(seconds);
+}
+
+// console.log(convertTimeToSeconds("9:56"));
