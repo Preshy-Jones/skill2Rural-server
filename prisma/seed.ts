@@ -1,6 +1,12 @@
 import { PrismaClient } from "@prisma/client";
 // import { faker } from "@faker-js/faker";
 
+//a functioM to convert time in the format of mm:ss to seconds
+function convertTimeToSeconds(time) {
+  const [minutes, seconds] = time.split(":");
+  return parseInt(minutes) * 60 + parseInt(seconds);
+}
+
 const dummyVideos = [
   {
     id: "1",
@@ -159,11 +165,5 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
-
-//a functioM to convert time in the format of mm:ss to seconds
-function convertTimeToSeconds(time) {
-  const [minutes, seconds] = time.split(":");
-  return parseInt(minutes) * 60 + parseInt(seconds);
-}
 
 // console.log(convertTimeToSeconds("9:56"));
