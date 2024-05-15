@@ -24,9 +24,11 @@ export class CertificateRepository {
 
   async findCertificate(
     where: Prisma.CertificateWhereInput,
+    includes?: Prisma.CertificateInclude,
   ): Promise<Certificate | null> {
     return this.prisma.certificate.findFirst({
       where,
+      ...(includes && { include: includes }),
     });
   }
 

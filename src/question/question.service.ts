@@ -146,17 +146,24 @@ export class QuestionService {
   }
   async getUserCertificate(courseId: number, userId: number) {
     try {
-      const certificate = await this.certificateRepository.certificate(
+      const certificate = await this.certificateRepository.findCertificate(
         {
           courseId,
           userId,
         },
         {
           course: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
       );
 
-      if (certificate.length === 0) {
+      if (!certificate) {
         throw new HttpException("Certificate not found", HttpStatus.NOT_FOUND);
       }
 
