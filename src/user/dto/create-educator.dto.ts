@@ -1,41 +1,41 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
 
 enum UserType {
-  Educator = 'EDUCATOR',
-  Student = 'STUDENT',
+  Educator = "EDUCATOR",
+  Student = "STUDENT",
 }
 
 export class CreateEducatorDto {
   @ApiProperty({
-    description: 'The name of the user',
+    description: "The name of the user",
     type: String,
-    example: 'Precious',
+    example: "Precious",
   })
   @IsNotEmpty()
   @IsString()
   name: string;
 
   @ApiProperty({
-    description: 'The email of the user',
+    description: "The email of the user",
     type: String,
-    example: 'adedibuprecious@gmail.com',
+    example: "adedibuprecious@gmail.com",
   })
   @IsNotEmpty()
   @IsString()
   email: string;
 
   @ApiProperty({
-    description: 'The password of the user',
+    description: "The password of the user",
     type: String,
-    example: 'password',
+    example: "password",
   })
   @IsNotEmpty()
   @IsString()
   password: string;
 
   @ApiProperty({
-    description: 'The type of the user',
+    description: "The type of the user",
     type: String,
     example: UserType.Educator,
   })
@@ -44,25 +44,25 @@ export class CreateEducatorDto {
   type: string;
 
   @ApiProperty({
-    description: 'The organisation of the user',
+    description: "The organisation of the user",
     type: String,
-    example: 'Andela',
+    example: "Andela",
   })
   @IsNotEmpty()
   @IsString()
   organisation: string;
 
   @ApiProperty({
-    description: 'The role of the user',
+    description: "The role of the user",
     type: String,
-    example: 'Educator',
+    example: "Educator",
   })
   @IsNotEmpty()
   @IsString()
   role: string;
 
   @ApiProperty({
-    description: 'The number of students to reach',
+    description: "The number of students to reach",
     type: Number,
     example: 100,
   })
@@ -71,7 +71,7 @@ export class CreateEducatorDto {
   no_of_students_to_reach: number;
 
   @ApiProperty({
-    description: 'Work with marginalized populations',
+    description: "Work with marginalized populations",
     type: Boolean,
     example: true,
   })

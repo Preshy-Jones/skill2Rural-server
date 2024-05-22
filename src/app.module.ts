@@ -10,7 +10,9 @@ import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { APP_GUARD } from "@nestjs/core";
 import { MailModule } from "./mail/mail.module";
 import { CourseProgressModule } from "./course-progress/course-progress.module";
-import { QuestionModule } from './question/question.module';
+import { QuestionModule } from "./question/question.module";
+import { UploadModule } from "./upload/upload.module";
+import { ConfigModule } from "@nestjs/config";
 
 @Module({
   imports: [
@@ -21,6 +23,12 @@ import { QuestionModule } from './question/question.module';
     MailModule,
     CourseProgressModule,
     QuestionModule,
+    UploadModule,
+    ConfigModule.forRoot({
+      // load: [configuration],
+      isGlobal: true,
+      cache: true,
+    }),
   ],
   controllers: [AppController],
   providers: [

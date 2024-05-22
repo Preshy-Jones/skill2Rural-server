@@ -6,16 +6,23 @@ import {
   Patch,
   Get,
   Request,
+  UseInterceptors,
+  UploadedFile,
+  Put,
+  ParseFilePipe,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { UpdateUserDto } from "./dto/update-user.dto";
-
 import { CreateEducatorDto } from "./dto/create-educator.dto";
 import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
+import { successResponse } from "src/common/utils";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { multerOptions } from "src/config/multer.config";
+
 // import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller("user")
@@ -50,6 +57,7 @@ export class UserController {
   }
 
   @Patch(":id")
+  @UseInterceptors(FileInterceptor("file", multerOptions))
   @ApiTags("Update User")
   @ApiResponse({
     status: 200,
@@ -60,9 +68,19 @@ export class UserController {
     type: UpdateUserDto,
     description: "Json structure for user object",
   })
-  @Public()
-  update(@Param("id") id: number, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  update(
+    @Param("id") id: number,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    console.log(file);
+
+    // return {
+    //   updateUserDto,
+    //   file: file,
+    // };
+    return this.userService.update(id, updateUserDto, file);
   }
 
   // get logged in user
@@ -75,7 +93,7 @@ export class UserController {
   @ApiResponse({ status: 403, description: "Forbidden." })
   @ApiBearerAuth()
   getLoggedInUser(@Request() req) {
-    return req.user;
+    return successResponse(req.user, "User retrieved successfully");
   }
 
   @Post("forgot-password")

@@ -8,6 +8,8 @@ import { MailModule } from "src/mail/mail.module";
 import { MailService } from "src/mail/mail.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
+import { UploadModule } from "src/upload/upload.module";
+import { UploadService } from "src/upload/upload.service";
 
 @Module({
   controllers: [UserController],
@@ -17,8 +19,10 @@ import { JwtModule } from "@nestjs/jwt";
     PrismaService,
     UserRepository,
     AccountRecoveryRepository,
+    UploadService,
   ],
   imports: [
+    UploadModule,
     MailModule,
     ConfigModule,
     JwtModule.registerAsync({

@@ -13,6 +13,7 @@ import { UserRepository } from "src/user/repositories/user.repository";
 import { MailModule } from "src/mail/mail.module";
 import { MailService } from "src/mail/mail.service";
 import { AccountRecoveryRepository } from "src/user/repositories/accountRecovery.repository";
+import { UploadService } from "src/upload/upload.service";
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AccountRecoveryRepository } from "src/user/repositories/accountRecovery
     UserRepository,
     AccountRecoveryRepository,
     MailService,
+    UploadService,
   ],
   exports: [AuthService],
 })

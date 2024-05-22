@@ -12,6 +12,7 @@ import { AccountRecoveryRepository } from "./repositories/accountRecovery.reposi
 import { forgotPasswordTemplate } from "src/common/utils/mailTemplates";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { JwtService } from "@nestjs/jwt";
+import { UploadService } from "src/upload/upload.service";
 // import { AccountRecoveryRepository } from './repositories/accountRecovery.repository';
 // import { ForgotPasswordDto } from './dto/forgot-password.dto';
 // import { MailService } from 'src/mail/mail.service';
@@ -24,6 +25,7 @@ export class UserService {
     private AccountRecoveryRepository: AccountRecoveryRepository,
     private mailService: MailService,
     private jwtService: JwtService,
+    private uploadService: UploadService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -63,8 +65,32 @@ export class UserService {
   }
 
   //update user
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    profile_photo: Express.Multer.File,
+  ) {
     try {
+      //check if user exists
+      const user = await this.userRepository.findOne({
+        where: { id },
+      });
+
+      if (!user) {
+        throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+      }
+
+      //check if profile photo exists
+      if (profile_photo) {
+        //upload profile photo
+        const uploadedPhoto = await this.uploadService.s3UploadFile(
+          profile_photo,
+          "profile_photos",
+        );
+
+        updateUserDto.profile_photo = uploadedPhoto.imageUrl;
+      }
+
       return this.userRepository.update({
         where: { id },
         data: updateUserDto,
