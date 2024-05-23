@@ -13,7 +13,13 @@ import {
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { CreateEducatorDto } from "./dto/create-educator.dto";
 import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
@@ -22,15 +28,19 @@ import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { successResponse } from "src/common/utils";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { multerOptions } from "src/config/multer.config";
+import { ChangePasswordDto } from "./dto/changePassword.dto";
 
 // import { UpdateUserDto } from './dto/update-user.dto';
 
+@ApiTags("User")
 @Controller("user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @ApiTags("Register User")
+  @ApiOperation({
+    summary: "Register new user",
+  })
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
@@ -45,7 +55,9 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  @ApiTags("Register Educator")
+  @ApiOperation({
+    summary: "Register new educator",
+  })
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
@@ -56,9 +68,30 @@ export class UserController {
     return this.userService.create(createEducatorDto);
   }
 
+  // // change password
+  @Patch("change-password")
+  @ApiOperation({
+    summary: "Change Password",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Password changed successfully",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden." })
+  @ApiBody({
+    type: ChangePasswordDto,
+    description: "Json structure for change password object",
+  })
+  @ApiBearerAuth()
+  changePassword(@Body() changePasswordDto: ChangePasswordDto, @Request() req) {
+    return this.userService.changePassword(changePasswordDto, req.user.id);
+  }
+
   @Patch(":id")
   @UseInterceptors(FileInterceptor("file", multerOptions))
-  @ApiTags("Update User")
+  @ApiOperation({
+    summary: "Update user",
+  })
   @ApiResponse({
     status: 200,
     description: "The record has been successfully updated.",
@@ -85,7 +118,9 @@ export class UserController {
 
   // get logged in user
   @Get("me")
-  @ApiTags("Get Logged In User")
+  @ApiOperation({
+    summary: "Get logged in user",
+  })
   @ApiResponse({
     status: 200,
     description: "The record has been successfully retrieved.",
@@ -97,7 +132,9 @@ export class UserController {
   }
 
   @Post("forgot-password")
-  @ApiTags("Forgot Password")
+  @ApiOperation({
+    summary: "Forgot Password",
+  })
   @ApiResponse({
     status: 200,
     description:
@@ -110,7 +147,9 @@ export class UserController {
   }
 
   @Patch("reset-password/:token")
-  @ApiTags("Reset Password")
+  @ApiOperation({
+    summary: "Reset Password",
+  })
   @ApiResponse({
     status: 200,
     description: "Password reset successful",
@@ -126,7 +165,9 @@ export class UserController {
 
   //get all users
   @Get("/all")
-  @ApiTags("Get All Users")
+  @ApiOperation({
+    summary: "Get all users",
+  })
   @ApiResponse({
     status: 200,
     description: "The records have been successfully retrieved.",

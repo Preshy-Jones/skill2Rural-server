@@ -13,6 +13,7 @@ import { forgotPasswordTemplate } from "src/common/utils/mailTemplates";
 import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { JwtService } from "@nestjs/jwt";
 import { UploadService } from "src/upload/upload.service";
+import { ChangePasswordDto } from "./dto/changePassword.dto";
 // import { AccountRecoveryRepository } from './repositories/accountRecovery.repository';
 // import { ForgotPasswordDto } from './dto/forgot-password.dto';
 // import { MailService } from 'src/mail/mail.service';
@@ -263,6 +264,44 @@ export class UserService {
       await this.AccountRecoveryRepository.delete({ id: accountRecovery.id });
 
       return successResponse({}, "Password reset successful");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async changePassword(changePasswordDto: ChangePasswordDto, userId: number) {
+    try {
+      const { oldPassword, newPassword, confirmPassword } = changePasswordDto;
+
+      //check if password and confirm password match
+      if (newPassword !== confirmPassword) {
+        throw new HttpException(
+          "Password and confirm password do not match",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+      });
+
+      //check if old password matches
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+
+      if (!isMatch) {
+        throw new HttpException("Invalid old password", HttpStatus.BAD_REQUEST);
+      }
+
+      //hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      //update user password
+      await this.userRepository.update({
+        where: { email: user.email },
+        data: { password: hashedPassword },
+      });
+
+      return successResponse({}, "Password changed successfully");
     } catch (error) {
       throw error;
     }
