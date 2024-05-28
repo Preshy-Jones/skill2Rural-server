@@ -85,7 +85,7 @@ export class UserController {
     return this.userService.changePassword(changePasswordDto, req.user.id);
   }
 
-  @Patch(":id")
+  @Patch("")
   @UseInterceptors(FileInterceptor("file", multerOptions))
   @ApiOperation({
     summary: "Update user",
@@ -100,8 +100,8 @@ export class UserController {
     description: "Json structure for user object",
   })
   update(
-    @Param("id") id: number,
     @Body() updateUserDto: UpdateUserDto,
+    @Request() req,
     @UploadedFile()
     file: Express.Multer.File,
   ) {
@@ -111,7 +111,8 @@ export class UserController {
     //   updateUserDto,
     //   file: file,
     // };
-    return this.userService.update(id, updateUserDto, file);
+    const userId = req.user.id;
+    return this.userService.update(userId, updateUserDto, file);
   }
 
   // get logged in user
