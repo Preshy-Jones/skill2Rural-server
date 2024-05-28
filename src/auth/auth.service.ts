@@ -42,6 +42,7 @@ export class AuthService {
         email: user.email,
         id: user.id,
         name: user.name,
+        profile_photo: user.profile_photo,
       };
     } catch (error) {
       throw error;
