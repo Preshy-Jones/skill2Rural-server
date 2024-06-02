@@ -1,11 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import mailgun from "mailgun-js";
 import nodemailer from "nodemailer";
-
+import { Resend } from "resend";
 import { SendMailDto } from "./dto/send-mail.dto";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class MailService {
+  constructor(private configService: ConfigService) {}
+
   sendMailNodeMailer(createMailDto: SendMailDto) {
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -52,5 +55,35 @@ export class MailService {
       console.log(body);
     });
     return `This action sends a mail to ${sendMailDto.to}`;
+  }
+
+  sendMailResend(sendMailDto: SendMailDto) {
+    console.log(this.configService.get("RESEND_API_KEY"));
+
+    const resend = new Resend(this.configService.get("RESEND_API_KEY"));
+
+    // resend.emails.send({
+    //   from: "onboarding@resend.dev",
+    //   to: "skillrural@gmail.com",
+    //   subject: "Hello World",
+    //   html: "<p>Congrats on sending your <strong>first email</strong>!</p>",
+    // });
+
+    const payload = {
+      from: "SKILL2RURAL",
+      to: "delivered@resend.dev",
+      subject: sendMailDto.subject,
+      html: sendMailDto.html,
+      text: sendMailDto.text,
+    };
+    console.log(payload);
+
+    resend.emails.send({
+      from: "SKILL2RURAL",
+      to: sendMailDto.to,
+      subject: sendMailDto.subject,
+      html: sendMailDto.html,
+      text: sendMailDto.text,
+    });
   }
 }

@@ -11,6 +11,7 @@ import { CourseReviewRepository } from "src/course/repositories/review.repositor
 import { CourseQuestionRepository } from "./repositories/question.repository";
 import { CertificateRepository } from "./repositories/certificate.repository";
 import { CourseProgressModule } from "src/course-progress/course-progress.module";
+import { QuizRepository } from "./repositories/quiz.repository.dto";
 
 @Module({
   imports: [CourseModule, CourseProgressModule],
@@ -25,6 +26,7 @@ import { CourseProgressModule } from "src/course-progress/course-progress.module
     CourseReviewRepository,
     CourseQuestionRepository,
     CertificateRepository,
+    QuizRepository,
   ],
 })
 export class QuestionModule {}

@@ -8,7 +8,6 @@ import { CourseProgressRepository } from "./repositories/course-progress.reposit
 import { PrismaService } from "src/prisma.service";
 import { CourseReviewRepository } from "src/course/repositories/review.repositories";
 import { CourseQuestionRepository } from "src/course/repositories/question.repository";
-import { QuizRepository } from "src/course/repositories/quiz.repository.dto";
 import { CertificateRepository } from "src/course/repositories/certificate.repository";
 
 @Module({
@@ -22,7 +21,6 @@ import { CertificateRepository } from "src/course/repositories/certificate.repos
     CourseRepository,
     CourseReviewRepository,
     CourseQuestionRepository,
-    QuizRepository,
     CertificateRepository,
   ],
   exports: [CourseProgressService, CourseProgressRepository],
