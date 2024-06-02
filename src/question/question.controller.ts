@@ -8,7 +8,7 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import { AddQuestionDto } from "./dto/add-question.dto";
-import { CreateCertificateDto } from "./dto/create-certificate.dto";
+import { ProcessQuizDto } from "./dto/process-quiz.dto";
 
 @ApiTags("Question")
 @Controller("questions")
@@ -83,21 +83,51 @@ export class QuestionController {
   }
 
   //create certificate
-  @Post("certificate/:courseId")
+  @Post("quiz/:courseId")
   @ApiOperation({
-    summary: "Create Certificate",
+    summary: "Process Quiz",
   })
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
   })
   @ApiBearerAuth()
-  createCertificate(
+  processQuiz(
     @Param("courseId") courseId: string,
     @Request() req,
-    @Body() data: CreateCertificateDto,
+    @Body() data: ProcessQuizDto,
   ) {
     const userId = req.user.id;
-    return this.questionService.createCertificate(+courseId, userId, data);
+    return this.questionService.processQuiz(+courseId, userId, data);
+  }
+
+  // Get User's Quiz Results
+  @Get("quiz/:courseId")
+  @ApiOperation({
+    summary: "Get User Quiz Results",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "The records have been successfully retrieved.",
+  })
+  @ApiBearerAuth()
+  getUserQuizResults(@Param("courseId") courseId: string, @Request() req) {
+    const userId = req.user.id;
+    return this.questionService.getUserQuizResults(+courseId, userId);
+  }
+
+  // Get User's Best Quiz Result
+  @Get("quiz/best/:courseId")
+  @ApiOperation({
+    summary: "Get User Best Quiz Result",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "The record has been successfully retrieved.",
+  })
+  @ApiBearerAuth()
+  getUserBestQuizResult(@Param("courseId") courseId: string, @Request() req) {
+    const userId = req.user.id;
+    return this.questionService.getUserBestQuizResult(+courseId, userId);
   }
 }

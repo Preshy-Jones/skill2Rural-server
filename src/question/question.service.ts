@@ -1,12 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { successResponse } from "src/common/utils";
 import { AddQuestionDto } from "src/course/dto/add-question.dto";
-import { CreateCertificateDto } from "./dto/create-certificate.dto";
 import { CourseService } from "src/course/course.service";
 import { CertificateRepository } from "./repositories/certificate.repository";
 import { CourseRepository } from "src/course/repositories/course.repository";
 import { CourseQuestionRepository } from "./repositories/question.repository";
 import { CourseProgressRepository } from "src/course-progress/repositories/course-progress.repository";
+import { ProcessQuizDto } from "./dto/process-quiz.dto";
+import { QuizRepository } from "./repositories/quiz.repository.dto";
 
 @Injectable()
 export class QuestionService {
@@ -16,6 +17,7 @@ export class QuestionService {
     private courseRepository: CourseRepository,
     private courseQuestionRepository: CourseQuestionRepository,
     private courseProgressRepository: CourseProgressRepository,
+    private quizRepository: QuizRepository,
   ) {}
 
   async addNewQuestion(courseId: number, data: AddQuestionDto) {
@@ -100,10 +102,10 @@ export class QuestionService {
     }
   }
 
-  async createCertificate(
+  async processQuiz(
     courseId: number,
     userId: number,
-    createCertificateDto: CreateCertificateDto,
+    processQuizDto: ProcessQuizDto,
   ) {
     try {
       const course = await this.courseService.findOne(courseId, userId);
@@ -125,8 +127,11 @@ export class QuestionService {
         );
       }
 
-      const certificate = await this.certificateRepository.create({
-        ...createCertificateDto,
+      let passed = false;
+
+      //create quiz
+      await this.quizRepository.create({
+        ...processQuizDto,
         course: {
           connect: {
             id: courseId,
@@ -139,7 +144,31 @@ export class QuestionService {
         },
       });
 
-      return successResponse(certificate, "Certificate created successfully");
+      if (processQuizDto.gradeInPercentage >= 70) {
+        await this.certificateRepository.create({
+          ...processQuizDto,
+          course: {
+            connect: {
+              id: courseId,
+            },
+          },
+          user: {
+            connect: {
+              id: userId,
+            },
+          },
+        });
+        passed = true;
+      } else {
+      }
+
+      return successResponse(
+        {
+          passed,
+          gradeInPercentage: processQuizDto.gradeInPercentage,
+        },
+        "Quiz processed successfully",
+      );
     } catch (error) {
       throw error;
     }
@@ -188,7 +217,7 @@ export class QuestionService {
       );
 
       // get all courses where the user is enrolled
-      const courses = await this.courseRepository.course({
+      const courses = await this.courseRepository.courses({
         progress: {
           some: {
             userId,
@@ -209,6 +238,44 @@ export class QuestionService {
           total_courses_enrolled: courses.length,
         },
         "Certificates retrieved successfully",
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUserQuizResults(courseId: number, userId: number) {
+    try {
+      const quizResults = await this.quizRepository.quizes({
+        courseId,
+        userId,
+      });
+
+      return successResponse(
+        quizResults,
+        "Quiz results retrieved successfully",
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getUserBestQuizResult(courseId: number, userId: number) {
+    try {
+      const bestQuiz = await this.quizRepository.quiz(
+        {
+          courseId,
+          userId,
+        },
+        {},
+        {
+          gradeInPercentage: "desc",
+        },
+      );
+
+      return successResponse(
+        bestQuiz,
+        "Best quiz result retrieved successfully",
       );
     } catch (error) {
       throw error;

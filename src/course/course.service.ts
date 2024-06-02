@@ -7,7 +7,6 @@ import { successResponse } from "src/common/utils";
 import { CourseReviewRepository } from "./repositories/review.repositories";
 import { AddCourseReviewDto } from "./dto/add-course-review.dto";
 import { CourseQuestionRepository } from "./repositories/question.repository";
-import { QuizRepository } from "./repositories/quiz.repository.dto";
 import { CertificateRepository } from "./repositories/certificate.repository";
 import { Course } from "@prisma/client";
 
@@ -18,7 +17,7 @@ export class CourseService {
     private courseRepository: CourseRepository,
     private courseReviewRepository: CourseReviewRepository,
     private courseQuestionRepository: CourseQuestionRepository,
-    private quizRepository: QuizRepository,
+
     private certificateRepository: CertificateRepository,
   ) {}
 
@@ -28,7 +27,7 @@ export class CourseService {
 
   async findAll() {
     try {
-      const courses = await this.courseRepository.course({});
+      const courses = await this.courseRepository.courses({});
       return successResponse(courses, "Courses retrieved successfully");
     } catch (error) {
       throw error;
@@ -70,7 +69,7 @@ export class CourseService {
   }> {
     try {
       // get all courses where the user is enrolled
-      const courses = await this.courseRepository.course(
+      const courses = await this.courseRepository.courses(
         {
           progress: {
             some: {
@@ -229,45 +228,4 @@ export class CourseService {
       throw error;
     }
   }
-
-  // async submitQuiz(courseId: number, data: SubmitQuizDto) {
-  //   try {
-  //     const course = await this.courseRepository.findOne({
-  //       where: { id: courseId },
-  //     });
-
-  //     if (!course) {
-  //       throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
-  //     }
-
-  //     // check if user has already submitted the quiz
-  //     const userQuiz = await this.quizRepository.quiz(
-  //       {
-  //         courseId,
-  //         userId: data.userId,
-  //       },
-  //       {
-  //         user: true,
-  //       },
-  //     );
-
-  //     if (userQuiz.length > 0) {
-  //       throw new HttpException(
-  //         "You have already submitted the quiz",
-  //         HttpStatus.CONFLICT,
-  //       );
-  //     }
-
-  //     const quiz = await this.quizRepository.create({
-  //       ...data,
-  //       course: {
-  //         connect: {
-  //           id: courseId,
-  //         },
-  //       },
-  //     });
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
 }

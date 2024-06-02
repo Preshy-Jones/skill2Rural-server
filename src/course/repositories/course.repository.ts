@@ -12,7 +12,10 @@ export class CourseRepository {
     });
   }
 
-  async course(where: Prisma.CourseWhereInput, include?: Prisma.CourseInclude) {
+  async courses(
+    where: Prisma.CourseWhereInput,
+    include?: Prisma.CourseInclude,
+  ) {
     return this.prisma.course.findMany({
       where,
       ...(include && { include }),
