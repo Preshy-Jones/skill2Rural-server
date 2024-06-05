@@ -54,6 +54,7 @@ model Course {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
   duration    Int
+  objectives  String[]
   reviews     CourseReview[]
   progress    CourseProgress[]
   questions   CourseQuestion[]
