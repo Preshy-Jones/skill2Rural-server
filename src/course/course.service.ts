@@ -27,14 +27,39 @@ export class CourseService {
 
   async findAll() {
     try {
-      const courses = await this.courseRepository.courses({});
+      const courses = await this.courseRepository.coursesSelect(
+        {},
+        {
+          id: true,
+          title: true,
+          description: true,
+          thumbnail_image: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      );
       return successResponse(courses, "Courses retrieved successfully");
     } catch (error) {
       throw error;
     }
   }
 
-  async findOne(
+  async findOne(id: number) {
+    try {
+      const course = await this.courseRepository.findOne({
+        id,
+      });
+      if (!course) {
+        throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
+      }
+
+      return successResponse(course, "Course retrieved successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getSingleCourse(
     id: number,
     userId: number,
   ): Promise<{

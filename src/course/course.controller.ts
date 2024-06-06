@@ -13,6 +13,7 @@ import { CourseService } from "./course.service";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AddCourseReviewDto } from "./dto/add-course-review.dto";
+import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 // import { AddQuestionDto } from "./dto/add-question.dto";
 // import { CreateCertificateDto } from "./dto/create-certificate.dto";
 
@@ -36,6 +37,7 @@ export class CourseController {
     return this.courseService.create(createCourseDto);
   }
 
+  @Public()
   @ApiTags("Find All Courses")
   @ApiResponse({
     status: 200,
@@ -73,6 +75,19 @@ export class CourseController {
   //   return this.courseService.getUserCertificates(userId);
   // }
 
+  @Public()
+  @Get("public/:id")
+  @ApiTags("Find Course by ID(Public)")
+  @ApiResponse({
+    status: 200,
+    description: "The record has been successfully retrieved.",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden" })
+  @ApiBearerAuth()
+  publicFindOneCourse(@Param("id") id: string) {
+    return this.courseService.findOne(+id);
+  }
+
   @Get(":id")
   @ApiTags("Find Course by ID")
   @ApiResponse({
@@ -83,7 +98,7 @@ export class CourseController {
   @ApiBearerAuth()
   findOneCourse(@Param("id") id: string, @Request() req) {
     const userId = req.user.id;
-    return this.courseService.findOne(+id, userId);
+    return this.courseService.getSingleCourse(+id, userId);
   }
 
   @Patch(":id")

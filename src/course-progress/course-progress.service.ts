@@ -17,7 +17,7 @@ export class CourseProgressService {
   ) {
     try {
       //check if course exists
-      const course = await this.courseService.findOne(courseId, userId);
+      const course = await this.courseService.getSingleCourse(courseId, userId);
 
       //check if course progress exists
       const courseProgress =
@@ -82,7 +82,7 @@ export class CourseProgressService {
   async getCourseProgress(userId: number, courseId: number) {
     try {
       //check if course exists
-      const course = await this.courseService.findOne(courseId, userId);
+      const course = await this.courseService.getSingleCourse(courseId, userId);
 
       if (!course) {
         throw new HttpException("Course not found", HttpStatus.NOT_FOUND);

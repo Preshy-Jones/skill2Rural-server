@@ -108,7 +108,7 @@ export class QuestionService {
     processQuizDto: ProcessQuizDto,
   ) {
     try {
-      const course = await this.courseService.findOne(courseId, userId);
+      const course = await this.courseService.getSingleCourse(courseId, userId);
 
       if (!course) {
         throw new HttpException("Course not found", HttpStatus.NOT_FOUND);

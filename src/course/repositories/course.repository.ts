@@ -12,6 +12,16 @@ export class CourseRepository {
     });
   }
 
+  async coursesSelect(
+    where: Prisma.CourseWhereInput,
+    select: Prisma.CourseSelect,
+  ) {
+    return this.prisma.course.findMany({
+      where,
+      select,
+    });
+  }
+
   async courses(
     where: Prisma.CourseWhereInput,
     include?: Prisma.CourseInclude,
