@@ -142,7 +142,19 @@ const dummyVideos = [
   },
 ];
 
-const courses = [
+interface Course {
+  title: string;
+  description: string;
+  objectives: string[];
+  questions: {
+    question: string;
+    options: string[];
+    answer: string;
+  }[];
+  video_url: string;
+  duration: number;
+}
+const courses: Course[] = [
   {
     title: "DESIGN THINKING",
     description:
@@ -205,7 +217,8 @@ const courses = [
       },
     ],
     video_url:
-      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/VISION+BOARD.mp4",
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/design+thinking.mp4",
+    duration: 1029,
   },
   {
     title: "SERVANT LEADERSHIP",
@@ -260,7 +273,8 @@ const courses = [
       },
     ],
     video_url:
-      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/VISION+BOARD.mp4",
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/servant+leadership.mp4",
+    duration: 629,
   },
   {
     title: "VISION BOARDING",
@@ -327,6 +341,7 @@ const courses = [
     ],
     video_url:
       "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/VISION+BOARD.mp4",
+    duration: 393,
   },
   {
     title: "SUSTAINABLE DEVELOPMENT GOALS (SDGS)",
@@ -380,7 +395,8 @@ const courses = [
       },
     ],
     video_url:
-      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/VISION+BOARD.mp4",
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/sdg.mp4",
+    duration: 1538,
   },
   {
     title: "MONEY MANAGEMENT",
@@ -432,7 +448,8 @@ const courses = [
       },
     ],
     video_url:
-      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/VISION+BOARD.mp4",
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/EP+1+MONEY+MANAGEMENT.mp4",
+    duration: 1331,
   },
   {
     title: "SOCIAL ENTREPRENEURSHIP",
@@ -503,7 +520,8 @@ const courses = [
       },
     ],
     video_url:
-      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/VISION+BOARD.mp4",
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/SOCIAL+ENTREPRENEURSHIP.mp4",
+    duration: 1056,
   },
   {
     title: "STORYTELLING FOR CHANGE",
@@ -588,7 +606,8 @@ const courses = [
       },
     ],
     video_url:
-      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/VISION+BOARD.mp4",
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/storytelling+for+change.mp4",
+    duration: 1515,
   },
 ];
 const prisma = new PrismaClient();
@@ -614,7 +633,7 @@ async function main() {
           description: course.description,
           objectives: course.objectives,
           video_url: course.video_url,
-          duration: convertTimeToSeconds("1:00:33"),
+          duration: course.duration,
           thumbnail_image: dummyVideos[0].thumbnailUrl,
         },
       });
