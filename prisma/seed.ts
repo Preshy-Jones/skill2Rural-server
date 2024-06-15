@@ -1,11 +1,4 @@
 import { PrismaClient } from "@prisma/client";
-// import { faker } from "@faker-js/faker";
-
-//a functioM to convert time in the format of mm:ss to seconds
-function convertTimeToSeconds(time) {
-  const [minutes, seconds] = time.split(":");
-  return parseInt(minutes) * 60 + parseInt(seconds);
-}
 
 const answerMapping = {
   A: 0,
@@ -14,133 +7,6 @@ const answerMapping = {
   D: 3,
   E: 4,
 };
-
-const dummyVideos = [
-  {
-    id: "1",
-    title: "Big Buck Bunny",
-    thumbnailUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/1200px-Big_Buck_Bunny_thumbnail_vlc.png",
-    duration: "9:56",
-    uploadTime: "May 9, 2011",
-    views: "24,969,123",
-    author: "Vlc Media Player",
-    videoUrl:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    description:
-      "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him, something snaps... and the rabbit ain't no bunny anymore! In the typical cartoon tradition he prepares the nasty rodents a comical revenge.\n\nLicensed under the Creative Commons Attribution license\nhttp://www.bigbuckbunny.org",
-    subscriber: "25254545 Subscribers",
-    isLive: true,
-  },
-  {
-    id: "2",
-    title: "The first Blender Open Movie from 2006",
-    thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-    duration: "10:53",
-    uploadTime: "May 9, 2011",
-    views: "24,969,123",
-    author: "Blender Inc.",
-    videoUrl:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-    description:
-      "Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series",
-    subscriber: "25254545 Subscribers",
-    isLive: true,
-  },
-  {
-    id: "3",
-    title: "For Bigger Blazes",
-    thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-    duration: "0:15",
-    uploadTime: "May 9, 2011",
-    views: "24,969,123",
-    author: "T-Series Regional",
-    videoUrl:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    description:
-      "Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series",
-    subscriber: "25254545 Subscribers",
-    isLive: true,
-  },
-  {
-    id: "4",
-    title: "For Bigger Escape",
-    thumbnailUrl:
-      "https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg",
-    duration: "0:15",
-    uploadTime: "May 9, 2011",
-    views: "24,969,123",
-    author: "T-Series Regional",
-    videoUrl:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    description:
-      " Introducing Chromecast. The easiest way to enjoy online video and music on your TV—for when Batman's escapes aren't quite big enough. For $35. Learn how to use Chromecast with Google Play Movies and more at google.com/chromecast.",
-    subscriber: "25254545 Subscribers",
-    isLive: false,
-  },
-  {
-    id: "5",
-    title: "Big Buck Bunny",
-    thumbnailUrl:
-      "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/1200px-Big_Buck_Bunny_thumbnail_vlc.png",
-    duration: "9:56",
-    uploadTime: "May 9, 2011",
-    views: "24,969,123",
-    author: "Vlc Media Player",
-    videoUrl:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
-    description:
-      "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself. When one sunny day three rodents rudely harass him, something snaps... and the rabbit ain't no bunny anymore! In the typical cartoon tradition he prepares the nasty rodents a comical revenge.\n\nLicensed under the Creative Commons Attribution license\nhttp://www.bigbuckbunny.org",
-    subscriber: "25254545 Subscribers",
-    isLive: true,
-  },
-  {
-    id: "6",
-    title: "For Bigger Blazes",
-    thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-    duration: "0:15",
-    uploadTime: "May 9, 2011",
-    views: "24,969,123",
-    author: "T-Series Regional",
-    videoUrl:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    description:
-      "Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series",
-    subscriber: "25254545 Subscribers",
-    isLive: false,
-  },
-  {
-    id: "7",
-    title: "For Bigger Escape",
-    thumbnailUrl:
-      "https://img.jakpost.net/c/2019/09/03/2019_09_03_78912_1567484272._large.jpg",
-    duration: "0:15",
-    uploadTime: "May 9, 2011",
-    views: "24,969,123",
-    author: "T-Series Regional",
-    videoUrl:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4",
-    description:
-      " Introducing Chromecast. The easiest way to enjoy online video and music on your TV—for when Batman's escapes aren't quite big enough. For $35. Learn how to use Chromecast with Google Play Movies and more at google.com/chromecast.",
-    subscriber: "25254545 Subscribers",
-    isLive: true,
-  },
-  {
-    id: "8",
-    title: "The first Blender Open Movie from 2006",
-    thumbnailUrl: "https://i.ytimg.com/vi_webp/gWw23EYM9VM/maxresdefault.webp",
-    duration: "10:53",
-    uploadTime: "May 9, 2011",
-    views: "24,969,123",
-    author: "Blender Inc.",
-    videoUrl:
-      "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-    description:
-      "Song : Raja Raja Kareja Mein Samaja\nAlbum : Raja Kareja Mein Samaja\nArtist : Radhe Shyam Rasia\nSinger : Radhe Shyam Rasia\nMusic Director : Sohan Lal, Dinesh Kumar\nLyricist : Vinay Bihari, Shailesh Sagar, Parmeshwar Premi\nMusic Label : T-Series",
-    subscriber: "25254545 Subscribers",
-    isLive: false,
-  },
-];
 
 interface Course {
   title: string;
@@ -153,6 +19,7 @@ interface Course {
   }[];
   video_url: string;
   duration: number;
+  thumbnail_image?: string;
 }
 const courses: Course[] = [
   {
@@ -219,6 +86,8 @@ const courses: Course[] = [
     video_url:
       "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/design+thinking.mp4",
     duration: 1029,
+    thumbnail_image:
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/thumbnails-temp/design-thinking.svg",
   },
   {
     title: "SERVANT LEADERSHIP",
@@ -275,6 +144,8 @@ const courses: Course[] = [
     video_url:
       "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/servant+leadership.mp4",
     duration: 629,
+    thumbnail_image:
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/thumbnails-temp/servant-leadership.svg",
   },
   {
     title: "VISION BOARDING",
@@ -342,6 +213,8 @@ const courses: Course[] = [
     video_url:
       "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/VISION+BOARD.mp4",
     duration: 393,
+    thumbnail_image:
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/thumbnails-temp/vision-boarding.svg",
   },
   {
     title: "SUSTAINABLE DEVELOPMENT GOALS (SDGS)",
@@ -397,6 +270,8 @@ const courses: Course[] = [
     video_url:
       "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/sdg.mp4",
     duration: 1538,
+    thumbnail_image:
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/thumbnails-temp/sdgs.svg",
   },
   {
     title: "MONEY MANAGEMENT",
@@ -450,6 +325,8 @@ const courses: Course[] = [
     video_url:
       "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/EP+1+MONEY+MANAGEMENT.mp4",
     duration: 1331,
+    thumbnail_image:
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/thumbnails-temp/money-management.svg",
   },
   {
     title: "SOCIAL ENTREPRENEURSHIP",
@@ -522,6 +399,8 @@ const courses: Course[] = [
     video_url:
       "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/SOCIAL+ENTREPRENEURSHIP.mp4",
     duration: 1056,
+    thumbnail_image:
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/thumbnails-temp/social-enterpreneurship.svg",
   },
   {
     title: "STORYTELLING FOR CHANGE",
@@ -608,6 +487,8 @@ const courses: Course[] = [
     video_url:
       "https://skill2rural.s3.eu-north-1.amazonaws.com/courses/storytelling+for+change.mp4",
     duration: 1515,
+    thumbnail_image:
+      "https://skill2rural.s3.eu-north-1.amazonaws.com/thumbnails-temp/story-telling.svg",
   },
 ];
 const prisma = new PrismaClient();
@@ -634,7 +515,7 @@ async function main() {
           objectives: course.objectives,
           video_url: course.video_url,
           duration: course.duration,
-          thumbnail_image: dummyVideos[0].thumbnailUrl,
+          thumbnail_image: course.thumbnail_image,
         },
       });
       const questionsData = await Promise.all(

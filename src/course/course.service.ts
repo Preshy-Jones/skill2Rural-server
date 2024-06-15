@@ -144,9 +144,18 @@ export class CourseService {
   ) {
     try {
       // check if course exists
-      const course = await this.courseRepository.findOne({
-        id: courseId,
-      });
+      const course = await this.courseRepository.findOne(
+        {
+          id: courseId,
+        },
+        {
+          progress: {
+            where: {
+              userId,
+            },
+          },
+        },
+      );
 
       if (!course) {
         throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
@@ -158,6 +167,14 @@ export class CourseService {
           courseId,
           userId,
         );
+
+      //check if course progress is up to 90 %
+      if (course.progress[0].progressPercentage < 90) {
+        throw new HttpException(
+          "You must complete the course before you can review it",
+          HttpStatus.FORBIDDEN,
+        );
+      }
 
       if (userReview) {
         throw new HttpException(

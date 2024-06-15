@@ -8,7 +8,13 @@ import {
   Delete,
   Request,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { CourseService } from "./course.service";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
@@ -17,12 +23,15 @@ import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 // import { AddQuestionDto } from "./dto/add-question.dto";
 // import { CreateCertificateDto } from "./dto/create-certificate.dto";
 
+@ApiTags("Course")
 @Controller("course")
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
 
   @Post()
-  @ApiTags("Create Course")
+  @ApiOperation({
+    summary: "Create new course",
+  })
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
@@ -38,7 +47,9 @@ export class CourseController {
   }
 
   @Public()
-  @ApiTags("Find All Courses")
+  @ApiOperation({
+    summary: "Get all courses",
+  })
   @ApiResponse({
     status: 200,
     description: "The records have been successfully retrieved.",
@@ -51,7 +62,9 @@ export class CourseController {
   }
   // Get User's enrolled courses
   @Get("enrolled")
-  @ApiTags("Get User Enrolled Courses")
+  @ApiOperation({
+    summary: "Get User Enrolled Courses",
+  })
   @ApiResponse({
     status: 200,
     description: "The records have been successfully retrieved.",
@@ -62,22 +75,11 @@ export class CourseController {
     return this.courseService.getUserEnrolledCourses(userId);
   }
 
-  // // Get User's Certificates
-  // @Get("certificate")
-  // @ApiTags("Get User Certificates")
-  // @ApiResponse({
-  //   status: 200,
-  //   description: "The records have been successfully retrieved.",
-  // })
-  // @ApiBearerAuth()
-  // getUserCertificates(@Request() req) {
-  //   const userId = req.user.id;
-  //   return this.courseService.getUserCertificates(userId);
-  // }
-
   @Public()
   @Get("public/:id")
-  @ApiTags("Find Course by ID(Public)")
+  @ApiOperation({
+    summary: "Get Course by ID(Public)",
+  })
   @ApiResponse({
     status: 200,
     description: "The record has been successfully retrieved.",
@@ -101,6 +103,7 @@ export class CourseController {
     return this.courseService.getSingleCourse(+id, userId);
   }
 
+  @ApiBearerAuth()
   @Patch(":id")
   updateCourse(
     @Param("id") id: string,
@@ -115,7 +118,9 @@ export class CourseController {
   }
 
   @Get("reviews/:courseId")
-  @ApiTags("Get Course Reviews")
+  @ApiOperation({
+    summary: "Get Course Reviews",
+  })
   @ApiResponse({
     status: 200,
     description: "The records have been successfully retrieved.",
@@ -127,7 +132,9 @@ export class CourseController {
   }
 
   @Post("reviews/:courseId")
-  @ApiTags("Add Course Review")
+  @ApiOperation({
+    summary: "Add Course Review",
+  })
   @ApiResponse({
     status: 201,
     description: "The record has been successfully created.",
