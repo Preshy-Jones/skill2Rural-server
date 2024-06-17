@@ -14,6 +14,7 @@ import { ResetPasswordDto } from "./dto/reset-password.dto";
 import { JwtService } from "@nestjs/jwt";
 import { UploadService } from "src/upload/upload.service";
 import { ChangePasswordDto } from "./dto/changePassword.dto";
+import { Prisma } from "@prisma/client";
 // import { AccountRecoveryRepository } from './repositories/accountRecovery.repository';
 // import { ForgotPasswordDto } from './dto/forgot-password.dto';
 // import { MailService } from 'src/mail/mail.service';
@@ -57,10 +58,14 @@ export class UserService {
     }
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(
+    email: string,
+    userType?: Prisma.UserWhereUniqueInput["type"],
+  ) {
     return this.prisma.user.findUnique({
       where: {
         email,
+        type: userType,
       },
     });
   }

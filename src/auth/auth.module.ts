@@ -14,6 +14,8 @@ import { MailModule } from "src/mail/mail.module";
 import { MailService } from "src/mail/mail.service";
 import { AccountRecoveryRepository } from "src/user/repositories/accountRecovery.repository";
 import { UploadService } from "src/upload/upload.service";
+import { StudentStrategy } from "src/common/strategy/student.strategy";
+import { EducatorStrategy } from "src/common/strategy/educator.strategy";
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { UploadService } from "src/upload/upload.service";
   providers: [
     AuthService,
     LocalStrategy,
+    StudentStrategy,
+    EducatorStrategy,
     JwtStrategy,
     UserService,
     PrismaService,
