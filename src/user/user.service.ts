@@ -156,7 +156,7 @@ export class UserService {
         html: forgotPasswordTemplate(magicLink, user.name),
       };
 
-      this.mailService.sendMailNodeMailer(mailData);
+      await this.mailService.sendMailResend(mailData);
 
       //save token to database
       await this.AccountRecoveryRepository.create({

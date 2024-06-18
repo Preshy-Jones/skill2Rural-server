@@ -57,7 +57,7 @@ export class MailService {
     return `This action sends a mail to ${sendMailDto.to}`;
   }
 
-  sendMailResend(sendMailDto: SendMailDto) {
+  async sendMailResend(sendMailDto: SendMailDto) {
     console.log(this.configService.get("RESEND_API_KEY"));
 
     const resend = new Resend(this.configService.get("RESEND_API_KEY"));
@@ -69,21 +69,22 @@ export class MailService {
     //   html: "<p>Congrats on sending your <strong>first email</strong>!</p>",
     // });
 
-    const payload = {
-      from: "SKILL2RURAL",
-      to: "delivered@resend.dev",
-      subject: sendMailDto.subject,
-      html: sendMailDto.html,
-      text: sendMailDto.text,
-    };
-    console.log(payload);
+    // console.log(payload);
 
-    resend.emails.send({
-      from: "SKILL2RURAL",
-      to: sendMailDto.to,
+    const { data, error } = await resend.emails.send({
+      from: "Skill2rural <admin@skill2rural.org>",
+      // from: "Acme <onboarding@resend.dev>",
+      to: [sendMailDto.to],
       subject: sendMailDto.subject,
       html: sendMailDto.html,
       text: sendMailDto.text,
     });
+
+    if (error) {
+      console.log(error);
+      return error;
+    }
+
+    console.log(data);
   }
 }
