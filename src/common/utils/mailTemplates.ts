@@ -7,7 +7,7 @@ export const forgotPasswordTemplate = (magicLink, username) => `
 
         <p>We received a request to reset the password for your account. If you made this request, please click the button below to continue.</p>
 
-        <a href="${magicLink}" style="background-color: #007bff; color: white; padding: 15px 25px; text-align: center; text-decoration: none; display: block; margin: 20px auto; border-radius: 5px; border: none;">Reset Password</a> 
+        <a href="${magicLink}" style="background-color: #60269E; color: white; padding: 15px 25px; text-align: center; text-decoration: none; display: block; margin: 20px auto; border-radius: 5px; border: none;">Reset Password</a> 
 
         <p><strong>If you don’t use this link within 3 hours, it will expire.</strong></p>
 
