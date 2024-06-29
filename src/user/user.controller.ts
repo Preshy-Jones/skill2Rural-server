@@ -27,6 +27,7 @@ import { successResponse } from "src/common/utils";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { multerOptions } from "src/config/multer.config";
 import { ChangePasswordDto } from "./dto/changePassword.dto";
+import { ContactUsDto } from "./dto/contact-us.dto";
 
 // import { UpdateUserDto } from './dto/update-user.dto';
 
@@ -175,5 +176,20 @@ export class UserController {
   @ApiBearerAuth()
   findAll() {
     return this.userService.findAllUsers();
+  }
+
+  //send contact us email
+  @Post("contact-us")
+  @ApiOperation({
+    summary: "Contact Us",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Message sent successfully",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden." })
+  @Public()
+  contactUs(@Body() contactUsDto: ContactUsDto) {
+    return this.userService.contactUs(contactUsDto);
   }
 }

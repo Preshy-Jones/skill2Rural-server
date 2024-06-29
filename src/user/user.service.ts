@@ -15,6 +15,7 @@ import { JwtService } from "@nestjs/jwt";
 import { UploadService } from "src/upload/upload.service";
 import { ChangePasswordDto } from "./dto/changePassword.dto";
 import { Prisma } from "@prisma/client";
+import { ContactUsDto } from "./dto/contact-us.dto";
 // import { AccountRecoveryRepository } from './repositories/accountRecovery.repository';
 // import { ForgotPasswordDto } from './dto/forgot-password.dto';
 // import { MailService } from 'src/mail/mail.service';
@@ -307,6 +308,23 @@ export class UserService {
       });
 
       return successResponse({}, "Password changed successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async contactUs(contactUsDto: ContactUsDto) {
+    try {
+      const mailData = {
+        to: process.env.CONTACT_EMAIL,
+        subject: contactUsDto.subject,
+        text: `Name: ${contactUsDto.name} \n Email: ${contactUsDto.email} \n Message: ${contactUsDto.message}`,
+        html: `<p>Name: ${contactUsDto.name} </p> <p>Email: ${contactUsDto.email} </p> <p>Message: ${contactUsDto.message} </p>`,
+      };
+
+      await this.mailService.sendMailResend(mailData);
+
+      return successResponse({}, "Message sent successfully");
     } catch (error) {
       throw error;
     }
