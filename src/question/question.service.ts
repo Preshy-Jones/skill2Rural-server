@@ -187,6 +187,7 @@ export class QuestionService {
               id: true,
               name: true,
               email: true,
+              profile_photo: true,
             },
           },
         },
