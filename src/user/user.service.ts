@@ -16,6 +16,7 @@ import { UploadService } from "src/upload/upload.service";
 import { ChangePasswordDto } from "./dto/changePassword.dto";
 import { Prisma } from "@prisma/client";
 import { ContactUsDto } from "./dto/contact-us.dto";
+import { UserType } from "./dto/create-educator.dto";
 // import { AccountRecoveryRepository } from './repositories/accountRecovery.repository';
 // import { ForgotPasswordDto } from './dto/forgot-password.dto';
 // import { MailService } from 'src/mail/mail.service';
@@ -52,6 +53,21 @@ export class UserService {
       createUserDto.password = hashedPassword;
 
       const savedUser = await this.userRepository.create(createUserDto);
+      await this.mailService.sendMailResend({
+        to: email,
+        subject: "Welcome to our platform",
+        text: `Welcome to our platform ${createUserDto.name}`,
+        html: `<p>Welcome to our platform ${createUserDto.name}</p>`,
+      });
+
+      const userType = createUserDto.type === UserType.Educator ? "Educator" : "Student";
+
+      await this.mailService.sendMailResend({
+        to: "skillrural@gmail.com",
+        subject: "New user registration",
+        text: `A new user with email ${createUserDto.email} has registered on the platform`,
+        html: `<p>A new user with email ${createUserDto.email} has registered on the platform</p>, <p> Name: ${createUserDto.name}</p>, user type: ${userType}`,
+      });
 
       return successResponse(savedUser, "User created successfully");
     } catch (error) {

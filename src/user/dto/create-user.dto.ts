@@ -1,11 +1,18 @@
 import {
+  IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MaxLength,
   MinLength,
 } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
+
+enum UserType {
+  Educator = "EDUCATOR",
+  Student = "STUDENT",
+}
 
 export class CreateUserDto {
   @ApiProperty({
@@ -41,4 +48,13 @@ export class CreateUserDto {
       "Password too weak, it must contain a number, lowercase and uppercase letter and a special character",
   })
   password: string;
+
+  @ApiProperty({
+    description: "The type of the user",
+    type: String,
+    example: UserType.Educator,
+  })
+  @IsOptional()
+  @IsEnum(UserType)
+  type?: UserType;
 }
