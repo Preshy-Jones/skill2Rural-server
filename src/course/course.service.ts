@@ -103,7 +103,13 @@ export class CourseService {
           },
         },
         {
-          progress: true,
+          //bring the course progress in which the progressPercentage is the highest, the course progress with the maximum progressPercentage
+          progress: {
+            orderBy: {
+              progressPercentage: "desc",
+            },
+            take: 1,
+          },
         },
       );
 
