@@ -16,6 +16,9 @@ import { AccountRecoveryRepository } from "src/user/repositories/accountRecovery
 import { UploadService } from "src/upload/upload.service";
 import { StudentStrategy } from "src/common/strategy/student.strategy";
 import { EducatorStrategy } from "src/common/strategy/educator.strategy";
+import { AdminRepository } from "src/admin/repositories/admin.repository";
+import { AdminService } from "src/admin/admin.service";
+import { AdminStrategy } from "src/common/strategy/admin.strategy";
 
 @Module({
   imports: [
@@ -38,6 +41,7 @@ import { EducatorStrategy } from "src/common/strategy/educator.strategy";
     LocalStrategy,
     StudentStrategy,
     EducatorStrategy,
+    AdminStrategy,
     JwtStrategy,
     UserService,
     PrismaService,
@@ -45,6 +49,8 @@ import { EducatorStrategy } from "src/common/strategy/educator.strategy";
     AccountRecoveryRepository,
     MailService,
     UploadService,
+    AdminRepository,
+    AdminService,
   ],
   exports: [AuthService],
 })
