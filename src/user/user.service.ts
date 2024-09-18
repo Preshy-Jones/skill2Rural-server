@@ -60,7 +60,8 @@ export class UserService {
         html: `<p>Welcome to our platform ${createUserDto.name}</p>`,
       });
 
-      const userType = createUserDto.type === UserType.Educator ? "Educator" : "Student";
+      const userType =
+        createUserDto.type === UserType.Educator ? "Educator" : "Student";
 
       await this.mailService.sendMailResend({
         to: "skillrural@gmail.com",
@@ -341,6 +342,14 @@ export class UserService {
       await this.mailService.sendMailResend(mailData);
 
       return successResponse({}, "Message sent successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async totalUsers() {
+    try {
+      return this.userRepository.count();
     } catch (error) {
       throw error;
     }

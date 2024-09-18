@@ -25,6 +25,7 @@ model User {
   CourseReview                      CourseReview[]
   Quiz                              Quiz[]
   Certificate                       Certificate[]
+  country                           String?
 }
 
 model Educator {

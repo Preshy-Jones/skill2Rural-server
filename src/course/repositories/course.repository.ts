@@ -63,4 +63,10 @@ export class CourseRepository {
       where,
     });
   }
+
+  async countCourses(where?: Prisma.CourseWhereInput) {
+    return this.prisma.course.count({
+      where,
+    });
+  }
 }

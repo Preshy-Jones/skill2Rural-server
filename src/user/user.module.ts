@@ -34,5 +34,6 @@ import { UploadService } from "src/upload/upload.service";
       }),
     }),
   ],
+  exports: [UserService],
 })
 export class UserModule {}
