@@ -25,6 +25,7 @@ model User {
   CourseReview                      CourseReview[]
   Quiz                              Quiz[]
   Certificate                       Certificate[]
+  country                           String?
 }
 
 model Educator {
@@ -43,6 +44,7 @@ model Educator {
 enum Type {
   STUDENT
   EDUCATOR
+  ADMIN
 }
 
 model Course {
@@ -133,5 +135,19 @@ model Certificate {
 }
 
 
+model Admin {
+  id                                Int              @id @default(autoincrement())
+  name                              String?
+  email                             String           @unique
+  password                          String?
+  status                           AdminStatus      @default(INACTIVE)
+  profile_photo                     String?
+}
 
-
+enum AdminStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DEACTIVATED
+  DELETED
+}

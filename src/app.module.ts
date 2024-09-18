@@ -13,6 +13,8 @@ import { CourseProgressModule } from "./course-progress/course-progress.module";
 import { QuestionModule } from "./question/question.module";
 import { UploadModule } from "./upload/upload.module";
 import { ConfigModule } from "@nestjs/config";
+import { AdminModule } from "./admin/admin.module";
+import { RolesGuard } from "./common/guards/roles.guard";
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { ConfigModule } from "@nestjs/config";
       isGlobal: true,
       cache: true,
     }),
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [
@@ -37,6 +40,10 @@ import { ConfigModule } from "@nestjs/config";
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
 })

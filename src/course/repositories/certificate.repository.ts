@@ -30,7 +30,7 @@ export class CertificateRepository {
     });
   }
 
-  async countCertificates(where: Prisma.CertificateWhereInput) {
+  async countCertificates(where?: Prisma.CertificateWhereInput) {
     return this.prisma.certificate.count({
       where,
     });
