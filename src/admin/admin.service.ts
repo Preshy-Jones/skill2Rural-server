@@ -6,8 +6,11 @@ import { CertificateRepository } from "src/course/repositories/certificate.repos
 import * as bcrypt from "bcryptjs";
 import { UserRepository } from "src/user/repositories/user.repository";
 import { CourseRepository } from "src/course/repositories/course.repository";
-import { CourseProgress } from "@prisma/client";
 import { CourseProgressRepository } from "src/course-progress/repositories/course-progress.repository";
+import { UserType } from "src/user/dto/create-educator.dto";
+import { subMonths } from "date-fns";
+import { Prisma } from "@prisma/client";
+import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
 
 @Injectable()
 export class AdminService {
@@ -15,13 +18,37 @@ export class AdminService {
     private adminRepository: AdminRepository,
     private certificateRepository: CertificateRepository,
     private userRepository: UserRepository,
+    private courseProgressRepository: CourseProgressRepository,
     private courseRepository: CourseRepository,
-    private courseProgress: CourseProgressRepository,
+    private quizRepository: QuizRepository,
   ) {}
-  async create(createAdminDto: CreateAdminDto) {
-    return "This action adds a new admin";
+  async validateAdmin(email: string, password: string) {
+    try {
+      const admin = await this.findByEmail(email);
+      if (!admin) {
+        throw new HttpException(
+          "No admin with that email exists in our records",
+          HttpStatus.NOT_FOUND,
+        );
+      }
+
+      const isMatch = await bcrypt.compare(password, admin.password);
+      if (!isMatch) {
+        throw new HttpException("Invalid Password", HttpStatus.UNAUTHORIZED);
+      }
+
+      return {
+        email: admin.email,
+        id: admin.id,
+        name: admin.name,
+        profile_photo: admin.profile_photo,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
+  async create(createAdminDto: CreateAdminDto) {}
   async login(LoginAdminDto: LoginAdminDto) {}
 
   async createCourse() {
@@ -52,11 +79,11 @@ export class AdminService {
 
     // get course completions for each course
     const courseCompletionsPerCourse =
-      await this.courseProgress.getCourseCompletionsPerCourse();
+      await this.courseProgressRepository.getCourseCompletionsPerCourse();
 
     // get course completions per user type
     const courseCompletionsPerUserType =
-      await this.courseProgress.getCourseCompletionsPerUserType();
+      await this.courseProgressRepository.getCourseCompletionsPerUserType();
 
     return {
       totalUsers,
@@ -68,29 +95,140 @@ export class AdminService {
     };
   }
 
-  async validateAdmin(email: string, password: string) {
-    try {
-      const admin = await this.findByEmail(email);
-      if (!admin) {
-        throw new HttpException(
-          "No admin with that email exists in our records",
-          HttpStatus.NOT_FOUND,
-        );
-      }
+  async getAllUsers() {
+    return this.userRepository.findAll();
+  }
 
-      const isMatch = await bcrypt.compare(password, admin.password);
-      if (!isMatch) {
-        throw new HttpException("Invalid Password", HttpStatus.UNAUTHORIZED);
-      }
+  async getUsersStats() {
+    // get total users
+    const totalUsers = await this.userRepository.count();
 
-      return {
-        email: admin.email,
-        id: admin.id,
-        name: admin.name,
-        profile_photo: admin.profile_photo,
-      };
-    } catch (error) {
-      throw error;
-    }
+    // Get the current date
+    const currentDate = new Date();
+
+    // Calculate the date one month ago
+    const oneMonthAgo = subMonths(currentDate, 1);
+
+    // Get the number of users created in the last month
+    const usersLastMonth = await this.userRepository.count({
+      createdAt: {
+        lte: oneMonthAgo,
+      },
+    });
+
+    // Calculate the percentage increase in total users from last month in 2 decimal places
+    const percentageIncreaseInTotalUsers = parseFloat(
+      (((totalUsers - usersLastMonth) / usersLastMonth) * 100).toFixed(2),
+    );
+
+    // get total educator users
+    const totalEducators = await this.userRepository.count({
+      type: UserType.Educator,
+    });
+
+    // Get the number of educators created in the last month
+    const educatorsLastMonth = await this.userRepository.count({
+      type: UserType.Educator,
+      createdAt: {
+        lte: oneMonthAgo,
+      },
+    });
+
+    // Calculate the percentage increase in total educators from last month in 2 decimal places
+    const percentageIncreaseInTotalEducators = parseFloat(
+      (
+        ((totalEducators - educatorsLastMonth) / educatorsLastMonth) *
+        100
+      ).toFixed(2),
+    );
+
+    // get total student users
+    const totalStudents = await this.userRepository.count({
+      type: UserType.Student,
+    });
+
+    // Get the number of students created in the last month
+    const studentsLastMonth = await this.userRepository.count({
+      type: UserType.Student,
+      createdAt: {
+        lte: oneMonthAgo,
+      },
+    });
+
+    // Calculate the percentage increase in total students from last month in 2 decimal places
+    const percentageIncreaseInTotalStudents = parseFloat(
+      (((totalStudents - studentsLastMonth) / studentsLastMonth) * 100).toFixed(
+        2,
+      ),
+    );
+
+    return {
+      totalUsers: {
+        value: totalUsers,
+        percentageIncreaseInTotalUsers,
+        usersLastMonth,
+      },
+      totalEducators: {
+        value: totalEducators,
+        percentageIncreaseInTotalEducators,
+      },
+      totalStudents: {
+        value: totalStudents,
+        percentageIncreaseInTotalStudents,
+      },
+    };
+  }
+
+  async getUserInfo(id: string) {
+    const user = await this.userRepository.uniqueUser({ id: Number(id) });
+
+    //get all total number of certificates for the user
+    const totalCertificates =
+      await this.certificateRepository.countCertificates({
+        userId: user.id,
+      });
+
+    const quizesByUser = await this.quizRepository.countQuizes({
+      userId: user.id,
+    });
+
+    const passingGrade = 70;
+    const passedQuizes = await this.quizRepository.countQuizes({
+      userId: user.id,
+      gradeInPercentage: {
+        gte: passingGrade,
+      },
+    });
+
+    const quizSuccessRate = (passedQuizes / quizesByUser) * 100;
+
+    //get total courses taken
+    const totalCoursesTakenByUser =
+      await this.courseProgressRepository.countCourseProgress({
+        userId: user.id,
+      });
+
+    const requiredProgressForCompletion = 90;
+
+    const totalCourseCompletedbyUser =
+      await this.courseProgressRepository.countCourseProgress({
+        userId: user.id,
+        progressPercentage: {
+          gte: requiredProgressForCompletion,
+        },
+      });
+
+    const percentageCompleted = parseFloat(
+      ((totalCourseCompletedbyUser / totalCoursesTakenByUser) * 100).toFixed(2)
+    );
+    return {
+      user,
+      totalCertificates,
+      quizesByUser,
+      quizSuccessRate,
+      totalCoursesTakenByUser,
+      totalCourseCompletedbyUser,
+      percentageCompleted,
+    };
   }
 }

@@ -38,6 +38,16 @@ export class UserRepository {
     });
   }
 
+  uniqueUser(
+    where: Prisma.UserWhereUniqueInput,
+    include?: Prisma.UserInclude,
+  ): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where,
+      ...(include && { include }),
+    });
+  }
+
   async findAll() {
     return this.prisma.user.findMany();
   }

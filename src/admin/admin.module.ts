@@ -9,6 +9,7 @@ import { CertificateRepository } from "src/course/repositories/certificate.repos
 import { QuestionModule } from "src/question/question.module";
 import { UserRepository } from "src/user/repositories/user.repository";
 import { CourseProgressRepository } from "src/course-progress/repositories/course-progress.repository";
+import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
 
 @Module({
   imports: [QuestionModule],
@@ -22,6 +23,7 @@ import { CourseProgressRepository } from "src/course-progress/repositories/cours
     CertificateRepository,
     UserRepository,
     CourseProgressRepository,
+    QuizRepository,
   ],
   exports: [AdminService],
 })

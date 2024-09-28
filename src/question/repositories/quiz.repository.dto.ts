@@ -19,6 +19,12 @@ export class QuizRepository {
     });
   }
 
+  async countQuizes(where?: Prisma.QuizWhereInput) {
+    return this.prisma.quiz.count({
+      where,
+    });
+  }
+
   async uniqueQuiz(
     where: Prisma.QuizWhereUniqueInput,
     includes?: Prisma.QuizInclude,

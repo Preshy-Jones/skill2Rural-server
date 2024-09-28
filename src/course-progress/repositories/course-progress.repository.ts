@@ -115,4 +115,10 @@ export class CourseProgressRepository {
       educatorCompletionRate: educatorCompletionRate.toFixed(2) + "%",
     };
   }
+
+  async countCourseProgress(where?: Prisma.CourseProgressWhereInput) {
+    return this.prisma.courseProgress.count({
+      where,
+    });
+  }
 }
