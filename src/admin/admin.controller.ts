@@ -20,7 +20,7 @@ import { LoginAdminDto } from "./dto/login-admin.dto";
 import { AdminAuthGuard } from "src/common/guards/admin-auth.guard";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { multerOptions } from "src/config/multer.config";
-import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
+import { Period } from "src/common/global/interface";
 
 @ApiTags("Admin")
 @Controller("admin")
@@ -101,5 +101,37 @@ export class AdminController {
   @ApiBearerAuth()
   async getUserInfo(@Param("id") id: string) {
     return this.adminService.getUserInfo(id);
+  }
+}
+
+@ApiTags("Admin Course")
+@Controller("admin/course")
+export class AdminCourseController {
+  constructor(private readonly adminService: AdminService) {}
+  //dashboard analytics
+  @ApiOperation({ summary: "Dashboard Analytics" })
+  @Get("dashboard-analytics")
+  @ApiBearerAuth()
+  async dashboard() {
+    return this.adminService.getCoursesAnalytics();
+  }
+
+  // get certificate distribution
+  @ApiOperation({ summary: "Get Certificate Distribution" })
+  @Get("certificate-distribution/:type/:value")
+  @ApiBearerAuth()
+  async certificateDistribution(
+    @Param("type") type: Period,
+    @Param("value") value: string,
+  ) {
+    return this.adminService.getCertificateDistribution(type, value);
+  }
+
+  // Get all courses
+  @ApiOperation({ summary: "Get All Courses" })
+  @Get()
+  @ApiBearerAuth()
+  async getAllCourses() {
+    return this.adminService.getAllCourses();
   }
 }

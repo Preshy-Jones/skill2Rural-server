@@ -56,51 +56,20 @@ export class UserRepository {
     return this.prisma.user.count({ where });
   }
 
-  async getUsersForEachMonth() {
-    const currentYear = new Date().getFullYear();
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
-
-    const usersPerMonth = await this.prisma.user.groupBy({
-      by: ["createdAt"],
-      _count: {
-        _all: true,
-      },
-      where: {
-        createdAt: {
-          gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
-          lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
-        },
-      },
+  async userGroupBy(
+    by: Prisma.UserScalarFieldEnum,
+    where: Prisma.UserWhereInput,
+    count?: Prisma.UserCountAggregateInputType,
+    orderBy?: Prisma.UserOrderByWithAggregationInput,
+  ) {
+    return this.prisma.user.groupBy({
+      by: [by],
       orderBy: {
-        createdAt: "asc",
+        createdAt: "desc",
       },
+      where,
+      ...(count && { _count: count }),
+      ...(orderBy && { orderBy }),
     });
-
-    // Aggregate the result by month
-    const monthlyUsers = Array(12).fill(0); // To represent each month (Jan - Dec)
-
-    usersPerMonth.forEach((user) => {
-      const month = new Date(user.createdAt).getMonth(); // Get month index (0 = Jan, 11 = Dec)
-      monthlyUsers[month] += user._count._all;
-    });
-
-    // Return the result with proper month names
-    return monthlyUsers.map((count, index) => ({
-      month: monthNames[index], // Convert index to month name
-      userCount: count,
-    }));
   }
 }

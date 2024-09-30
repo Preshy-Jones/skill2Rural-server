@@ -112,11 +112,6 @@ export class CourseController {
     return this.courseService.update(+id, updateCourseDto);
   }
 
-  @Delete(":id")
-  removeCourse(@Param("id") id: string) {
-    return this.courseService.remove(+id);
-  }
-
   @Get("reviews/:courseId")
   @ApiOperation({
     summary: "Get Course Reviews",

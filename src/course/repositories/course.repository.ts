@@ -69,4 +69,21 @@ export class CourseRepository {
       where,
     });
   }
+
+  async coursesGroupBy(
+    by: Prisma.CourseScalarFieldEnum,
+    where: Prisma.CourseWhereInput,
+    count?: Prisma.CourseCountAggregateInputType,
+    orderBy?: Prisma.CourseOrderByWithAggregationInput,
+  ) {
+    return this.prisma.course.groupBy({
+      by: [by],
+      orderBy: {
+        createdAt: "desc",
+      },
+      where,
+      ...(count && { _count: count }),
+      ...(orderBy && { orderBy }),
+    });
+  }
 }

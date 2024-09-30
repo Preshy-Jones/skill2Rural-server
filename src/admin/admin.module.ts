@@ -1,6 +1,6 @@
 import { Module } from "@nestjs/common";
 import { AdminService } from "./admin.service";
-import { AdminController } from "./admin.controller";
+import { AdminController, AdminCourseController } from "./admin.controller";
 import { AdminRepository } from "./repositories/admin.repository";
 import { PrismaService } from "src/prisma.service";
 import { CourseRepository } from "src/course/repositories/course.repository";
@@ -13,7 +13,7 @@ import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
 
 @Module({
   imports: [QuestionModule],
-  controllers: [AdminController],
+  controllers: [AdminController, AdminCourseController],
   providers: [
     AdminService,
     AdminRepository,

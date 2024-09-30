@@ -11,6 +11,7 @@ import { UserType } from "src/user/dto/create-educator.dto";
 import { subMonths } from "date-fns";
 import { Prisma } from "@prisma/client";
 import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
+import { CourseStatus, Period } from "src/common/global/interface";
 
 @Injectable()
 export class AdminService {
@@ -75,7 +76,7 @@ export class AdminService {
       await this.certificateRepository.countCertificates();
 
     // get users registered per month for bar chart
-    const usersPerMonth = await this.userRepository.getUsersForEachMonth();
+    const usersPerMonth = await this.getUsersForEachMonth();
 
     // get course completions for each course
     const courseCompletionsPerCourse =
@@ -218,9 +219,8 @@ export class AdminService {
         },
       });
 
-    const percentageCompleted = parseFloat(
-      ((totalCourseCompletedbyUser / totalCoursesTakenByUser) * 100).toFixed(2)
-    );
+    const percentageCompleted =
+      (totalCourseCompletedbyUser / totalCoursesTakenByUser) * 100;
     return {
       user,
       totalCertificates,
@@ -230,5 +230,184 @@ export class AdminService {
       totalCourseCompletedbyUser,
       percentageCompleted,
     };
+  }
+
+  async getCoursesAnalytics() {
+    //total courses
+    const totalCourses = await this.courseRepository.countCourses();
+
+    // get total active courses
+
+    const totalActiveCourses = await this.courseRepository.countCourses({
+      status: CourseStatus.ACTIVE,
+    });
+
+    // get archived courses
+
+    const totalArchivedCourses = await this.courseRepository.countCourses({
+      status: CourseStatus.ARCHIVED,
+    });
+
+    // get total certificates
+
+    const totalCertificates =
+      await this.certificateRepository.countCertificates();
+
+    const totalQuizes = await this.quizRepository.countQuizes();
+    const passingGrade = 70;
+    const successfulQuizes = await this.quizRepository.countQuizes({
+      gradeInPercentage: {
+        gte: passingGrade,
+      },
+    });
+
+    const quizSuccessRate = parseFloat(
+      ((successfulQuizes / totalQuizes) * 100).toFixed(2),
+    );
+
+    const failedQuizes = totalQuizes - successfulQuizes;
+
+    const failedQuizesRate = parseFloat(
+      ((failedQuizes / totalQuizes) * 100).toFixed(2),
+    );
+
+    return {
+      totalCourses,
+      totalActiveCourses,
+      totalArchivedCourses,
+      totalCertificates,
+      totalQuizes,
+      quizSuccessRate,
+      failedQuizesRate,
+    };
+  }
+
+  async getCertificateDistribution(type: Period, value: any) {
+    if (type === Period.YEARLY) {
+      return this.getCertificateDistributionForYear(value);
+    }
+  }
+
+  async getUsersForEachMonth() {
+    const currentYear = new Date().getFullYear();
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const usersPerMonth = await this.userRepository.userGroupBy(
+      "createdAt",
+      {
+        createdAt: {
+          gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
+          lt: new Date(`${currentYear + 1}-01-01T00:00:00.000Z`),
+        },
+      },
+      {
+        _all: true,
+      },
+      {
+        createdAt: "asc",
+      },
+    );
+
+    // Aggregate the result by month
+    const monthlyUsers = Array(12).fill(0); // To represent each month (Jan - Dec)
+
+    usersPerMonth.forEach((user) => {
+      const month = new Date(user.createdAt).getMonth(); // Get month index (0 = Jan, 11 = Dec)
+      monthlyUsers[month] += user._count._all;
+    });
+
+    // Return the result with proper month names
+    return monthlyUsers.map((count, index) => ({
+      month: monthNames[index], // Convert index to month name
+      userCount: count,
+    }));
+  }
+
+  async getCertificateDistributionForYear(year: number) {
+    const currentYear = new Date().getFullYear();
+
+    // Get the total number of certificates for each month in the year
+
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    const certificatesPerMonth =
+      await this.certificateRepository.groupByCertificate(
+        "createdAt",
+        {
+          createdAt: {
+            gte: new Date(`${Number(year)}-01-01T00:00:00.000Z`),
+            lt: new Date(`${Number(year) + 1}-01-01T00:00:00.000Z`),
+          },
+        },
+        {
+          _all: true,
+        },
+        {
+          createdAt: "asc",
+        },
+      );
+
+    // Aggregate the result by month
+    const monthlyCertificates = Array(12).fill(0); // To represent each month (Jan - Dec)
+
+    certificatesPerMonth.forEach((certificate) => {
+      const month = new Date(certificate.createdAt).getMonth(); // Get month index (0 = Jan, 11 = Dec)
+      monthlyCertificates[month] += certificate._count._all;
+    });
+
+    // Return the result with proper month names
+
+    return monthlyCertificates.map((count, index) => ({
+      month: monthNames[index], // Convert index to month name
+      certificateCount: count,
+    }));
+  }
+
+  async getAllCourses() {
+    // get all courses, also get the count of number of course progress that exceeds 90% which is the completion rate
+    const courses = await this.courseRepository.courses(
+      {},
+      {
+        _count: {
+          select: {
+            progress: {
+              where: {
+                progressPercentage: {
+                  gte: 90,
+                },
+              },
+            },
+          },
+        },
+      },
+    );
+
+    return courses;
   }
 }
