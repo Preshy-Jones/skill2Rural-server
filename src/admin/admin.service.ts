@@ -12,6 +12,7 @@ import { subMonths } from "date-fns";
 import { Prisma } from "@prisma/client";
 import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
 import { CourseStatus, Period } from "src/common/global/interface";
+import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class AdminService {
@@ -22,6 +23,7 @@ export class AdminService {
     private courseProgressRepository: CourseProgressRepository,
     private courseRepository: CourseRepository,
     private quizRepository: QuizRepository,
+    private prisma: PrismaService,
   ) {}
   async validateAdmin(email: string, password: string) {
     try {
@@ -230,6 +232,55 @@ export class AdminService {
       totalCourseCompletedbyUser,
       percentageCompleted,
     };
+  }
+
+  async getUserCourses(id: string) {
+    try {
+      // get the user's courses enrolled using the course progress, also count the number of quizzes attempted
+
+      const coursesEnrolled = await this.prisma.courseProgress.findMany({
+        where: {
+          userId: Number(id),
+        },
+        select: {
+          createdAt: true, // Enrolled date
+          completedDateTime: true, // Completion date
+          course: {
+            select: {
+              title: true, // Course title
+              Quiz: {
+                where: {
+                  userId: Number(id),
+                },
+                select: {
+                  gradeInPercentage: true, // Grade in percentage
+                },
+              },
+            },
+          },
+        },
+      });
+
+      const coursesWithQuizStats = coursesEnrolled.map((courseProgress) => {
+        const quizzes = courseProgress.course.Quiz;
+        const quizzesAttempted = quizzes.length;
+        const highestGrade = quizzes.length
+          ? Math.max(...quizzes.map((quiz) => quiz.gradeInPercentage))
+          : null;
+
+        return {
+          courseTitle: courseProgress.course.title,
+          enrolledDate: courseProgress.createdAt,
+          completionDate: courseProgress.completedDateTime,
+          quizzesAttempted,
+          highestQuizGrade: highestGrade,
+        };
+      });
+
+      return coursesWithQuizStats;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getCoursesAnalytics() {

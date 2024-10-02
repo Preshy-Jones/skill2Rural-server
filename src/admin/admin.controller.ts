@@ -6,6 +6,7 @@ import {
   UseInterceptors,
   Get,
   Param,
+  UploadedFile,
 } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import {
@@ -56,20 +57,7 @@ export class AdminController {
     return this.adminService.login(loginAdminDto);
   }
 
-  //create Course
-  @ApiOperation({ summary: "Create Course" })
-  @Post("create-course")
-  @UseInterceptors(FileInterceptor("file", multerOptions))
-  async createCourse() {
-    return this.adminService.createCourse();
-  }
-
-  //create Question
-  @ApiOperation({ summary: "Create Question" })
-  @Post("create-question")
-  async createQuestion() {
-    return this.adminService.createQuestion();
-  }
+  //Invite new admin User
 
   //dashboard analytics
   @ApiOperation({ summary: "Dashboard Analytics" })
@@ -102,6 +90,14 @@ export class AdminController {
   async getUserInfo(@Param("id") id: string) {
     return this.adminService.getUserInfo(id);
   }
+
+  // get user courses
+  @ApiOperation({ summary: "Get User's courses" })
+  @Get("user/:id/courses")
+  @ApiBearerAuth()
+  async getUserCourses(@Param("id") id: string) {
+    return this.adminService.getUserCourses(id);
+  }
 }
 
 @ApiTags("Admin Course")
@@ -133,5 +129,24 @@ export class AdminCourseController {
   @ApiBearerAuth()
   async getAllCourses() {
     return this.adminService.getAllCourses();
+  }
+
+  //create Question
+  @ApiOperation({ summary: "Create Question" })
+  @Post("create-question")
+  async createQuestion() {
+    return this.adminService.createQuestion();
+  }
+
+  // create course
+  @ApiOperation({ summary: "Create Course" })
+  @Post()
+  @UseInterceptors(FileInterceptor("file", multerOptions))
+  async createCourse(
+    @Body() body: any,
+    @UploadedFile()
+    file: Express.Multer.File,
+  ) {
+    return this.adminService.createCourse();
   }
 }
