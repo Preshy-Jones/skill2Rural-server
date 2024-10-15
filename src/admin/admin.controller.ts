@@ -24,6 +24,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { multerOptions } from "src/config/multer.config";
 import { Period } from "src/common/global/interface";
 import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
+import { CreateCourseDto } from "./dto/create-course.dto";
 
 @ApiTags("Admin")
 @Controller("admin")
@@ -141,9 +142,19 @@ export class AdminCourseController {
     return this.adminService.createQuestion();
   }
 
-  // create course
-  @ApiOperation({ summary: "Create Course" })
-  @Post()
+  //create Course
+  @ApiOperation({
+    summary: "Create Course",
+  })
+  @ApiResponse({
+    status: 201,
+    description: "Course created successfully",
+  })
+  @ApiBody({
+    type: CreateCourseDto,
+  })
+  @ApiBearerAuth()
+  @Post("create-course")
   @UseInterceptors(FileInterceptor("file", multerOptions))
   async createCourse(
     @Body() body: any,
