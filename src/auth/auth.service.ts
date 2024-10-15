@@ -11,15 +11,16 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
   loginUser(loginUserDto: LoginUserDto) {
-    console.log("dhdhdhh");
-
     return {
       message: "Login successful",
       data: {
         user: loginUserDto,
-        accessToken: this.jwtService.sign(loginUserDto, {
-          expiresIn: "1d",
-        }),
+        accessToken: this.jwtService.sign(
+          { ...loginUserDto, isAdmin: false },
+          {
+            expiresIn: "1d",
+          },
+        ),
       },
     };
   }
@@ -43,6 +44,7 @@ export class AuthService {
         id: user.id,
         name: user.name,
         profile_photo: user.profile_photo,
+        role: user.type,
       };
     } catch (error) {
       throw error;

@@ -15,7 +15,6 @@ model User {
   password                          String?
   type                              Type             @default(STUDENT)
   organisation                      String?
-  role                              String?
   no_of_students_to_reach           Int?
   work_with_maginalized_populations Boolean?
   profile_photo                     String?
@@ -43,7 +42,6 @@ model Educator {
 enum Type {
   STUDENT
   EDUCATOR
-  ADMIN
 }
 
 model Course {
@@ -141,7 +139,7 @@ model Admin {
   name                              String?
   email                             String           @unique
   password                          String?
-  status                           AdminStatus      @default(INACTIVE)
+  status                           AdminStatus      @default(ACTIVE)
   profile_photo                     String?
 }
 

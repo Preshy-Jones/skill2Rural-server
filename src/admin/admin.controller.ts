@@ -7,6 +7,7 @@ import {
   Get,
   Param,
   UploadedFile,
+  Request,
 } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import {
@@ -22,6 +23,7 @@ import { AdminAuthGuard } from "src/common/guards/admin-auth.guard";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { multerOptions } from "src/config/multer.config";
 import { Period } from "src/common/global/interface";
+import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 
 @ApiTags("Admin")
 @Controller("admin")
@@ -37,6 +39,7 @@ export class AdminController {
   @ApiBody({
     type: CreateAdminDto,
   })
+  @Public()
   @Post("register")
   create(@Body() createAdminDto: CreateAdminDto) {
     return this.adminService.create(createAdminDto);
@@ -51,10 +54,10 @@ export class AdminController {
   @ApiBody({
     type: LoginAdminDto,
   })
-  @UseGuards(AdminAuthGuard)
+  @Public()
   @Post("login")
-  async login(@Body() loginAdminDto: LoginAdminDto) {
-    return this.adminService.login(loginAdminDto);
+  async login(@Request() req) {
+    return this.adminService.login(req.user);
   }
 
   //Invite new admin User

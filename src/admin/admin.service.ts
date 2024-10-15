@@ -13,6 +13,7 @@ import { Prisma } from "@prisma/client";
 import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
 import { CourseStatus, Period } from "src/common/global/interface";
 import { PrismaService } from "src/prisma.service";
+import { JwtService } from "@nestjs/jwt";
 
 @Injectable()
 export class AdminService {
@@ -24,6 +25,7 @@ export class AdminService {
     private courseRepository: CourseRepository,
     private quizRepository: QuizRepository,
     private prisma: PrismaService,
+    private jwtService: JwtService,
   ) {}
   async validateAdmin(email: string, password: string) {
     try {
@@ -51,8 +53,56 @@ export class AdminService {
     }
   }
 
-  async create(createAdminDto: CreateAdminDto) {}
-  async login(LoginAdminDto: LoginAdminDto) {}
+  async create(createAdminDto: CreateAdminDto) {
+    try {
+      const { email, name, password } = createAdminDto;
+
+      // Check if admin already exists
+      const admin = await this.findByEmail(email);
+      if (admin) {
+        throw new HttpException(
+          "Admin with that email already exists",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Hash the password
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      // Create the admin
+      const newAdmin = await this.adminRepository.create({
+        email,
+        name,
+        password: hashedPassword,
+      });
+
+      return {
+        email: newAdmin.email,
+        id: newAdmin.id,
+        name: newAdmin.name,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+  async login(LoginAdminDto: LoginAdminDto) {
+    try {
+      return {
+        message: "Login successful",
+        data: {
+          accessToken: this.jwtService.sign(
+            { ...LoginAdminDto, isAdmin: false },
+            {
+              expiresIn: "1d",
+            },
+          ),
+        },
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
 
   async createCourse() {
     return "This action adds a new course";

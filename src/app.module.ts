@@ -41,10 +41,6 @@ import { RolesGuard } from "./common/guards/roles.guard";
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
     },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGuard,
-    },
   ],
 })
 export class AppModule {}

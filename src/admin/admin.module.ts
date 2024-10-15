@@ -10,9 +10,21 @@ import { QuestionModule } from "src/question/question.module";
 import { UserRepository } from "src/user/repositories/user.repository";
 import { CourseProgressRepository } from "src/course-progress/repositories/course-progress.repository";
 import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import { JwtModule } from "@nestjs/jwt";
 
 @Module({
-  imports: [QuestionModule],
+  imports: [
+    QuestionModule,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>("JWT_SECRET"),
+        signOptions: { expiresIn: "3h" },
+      }),
+    }),
+  ],
   controllers: [AdminController, AdminCourseController],
   providers: [
     AdminService,

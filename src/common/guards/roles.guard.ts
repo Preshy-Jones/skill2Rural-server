@@ -1,21 +1,26 @@
-import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { ROLES_KEY } from "../decorators/roles.decorator";
-import { Role } from "../enums/role.enum";
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { JwtService } from '@nestjs/jwt';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector, private jwtService: JwtService) {}
 
-  canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
-    if (!requiredRoles) {
-      return true;
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
+    const requiredRole = this.reflector.get<string>('role', context.getHandler());
+    if (!requiredRole) {
+      return true; // No role required for this route
     }
-    const { user } = context.switchToHttp().getRequest();
-    return requiredRoles.some((role) => user.roles?.includes(role));
+
+    const request = context.switchToHttp().getRequest();
+    const token = request.headers.authorization?.split(' ')[1]; // Extract JWT token
+
+    const decodedToken = this.jwtService.decode(token);
+    if (decodedToken['role'] !== requiredRole) {
+      return false; // Role mismatch
+    }
+
+    return true; // Role matches
   }
 }
