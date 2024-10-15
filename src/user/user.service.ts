@@ -17,6 +17,7 @@ import { ChangePasswordDto } from "./dto/changePassword.dto";
 import { Prisma } from "@prisma/client";
 import { ContactUsDto } from "./dto/contact-us.dto";
 import { UserType } from "./dto/create-educator.dto";
+import { ConfigService } from "@nestjs/config";
 // import { AccountRecoveryRepository } from './repositories/accountRecovery.repository';
 // import { ForgotPasswordDto } from './dto/forgot-password.dto';
 // import { MailService } from 'src/mail/mail.service';
@@ -30,6 +31,7 @@ export class UserService {
     private mailService: MailService,
     private jwtService: JwtService,
     private uploadService: UploadService,
+    private configService: ConfigService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -63,11 +65,14 @@ export class UserService {
       const userType =
         createUserDto.type === UserType.Educator ? "Educator" : "Student";
 
+      //get total users
+      const totalUsers = await this.userRepository.count();
+
       await this.mailService.sendMailResend({
-        to: "skillrural@gmail.com",
+        to: this.configService.get("RECEIVING_MAIL"),
         subject: "New user registration",
-        text: `A new user with email ${createUserDto.email} has registered on the platform`,
-        html: `<p>A new user with email ${createUserDto.email} has registered on the platform</p>, <p> Name: ${createUserDto.name}</p>, user type: ${userType}`,
+        text: `A new user with email ${createUserDto.email} has registered on the platform, total users on the platform is ${totalUsers}`,
+        html: `<p>A new user with email ${createUserDto.email} has registered on the platform</p>, <p> Name: ${createUserDto.name}</p>, user type: ${userType}, <p> Total users on the platform is ${totalUsers}</p>`,
       });
 
       return successResponse(savedUser, "User created successfully");
