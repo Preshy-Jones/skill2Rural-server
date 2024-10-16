@@ -25,6 +25,7 @@ import { multerOptions } from "src/config/multer.config";
 import { Period } from "src/common/global/interface";
 import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 import { CreateCourseDto } from "./dto/create-course.dto";
+import { AdminLoginGuard } from "src/common/guards/admin-login-guard";
 
 @ApiTags("Admin")
 @Controller("admin")
@@ -56,6 +57,7 @@ export class AdminController {
     type: LoginAdminDto,
   })
   @Public()
+  @UseGuards(AdminLoginGuard)
   @Post("login")
   async login(@Request() req) {
     return this.adminService.login(req.user);
@@ -64,6 +66,7 @@ export class AdminController {
   //Invite new admin User
 
   //dashboard analytics
+  @UseGuards(AdminAuthGuard)
   @ApiOperation({ summary: "Dashboard Analytics" })
   @Get("dashboard-analytics")
   @ApiBearerAuth()

@@ -17,6 +17,7 @@ import { UploadService } from "src/upload/upload.service";
 import { StudentStrategy } from "src/common/strategy/student.strategy";
 import { EducatorStrategy } from "src/common/strategy/educator.strategy";
 import { AdminRepository } from "src/admin/repositories/admin.repository";
+import { AdminStrategy } from "src/common/strategy/admin.strategy";
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { AdminRepository } from "src/admin/repositories/admin.repository";
     EducatorStrategy,
     JwtStrategy,
     UserService,
+    AdminStrategy,
     PrismaService,
     UserRepository,
     AccountRecoveryRepository,

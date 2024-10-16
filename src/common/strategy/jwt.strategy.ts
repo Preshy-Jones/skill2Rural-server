@@ -20,6 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: any) {
+    console.log(payload);
+
     // Check if the payload has an admin flag or field
     if (payload.isAdmin) {
       const admin = await this.adminRepository.findOneByEmail(payload.email);

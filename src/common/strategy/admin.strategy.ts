@@ -6,12 +6,14 @@ import { AuthService } from "src/auth/auth.service";
 
 @Injectable()
 export class AdminStrategy extends PassportStrategy(Strategy, "admin") {
-  constructor(private adminServic: AdminService) {
+  constructor(private authService: AuthService) {
     super({ usernameField: "email" });
   }
 
   async validate(email: string, password: string) {
-    const data = await this.adminServic.validateAdmin(email, password);
+
+
+    const data = await this.authService.validateAdmin(email, password);
 
     if (!data) {
       throw new UnauthorizedException();

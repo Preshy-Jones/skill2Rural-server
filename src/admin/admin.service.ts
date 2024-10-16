@@ -27,31 +27,6 @@ export class AdminService {
     private prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
-  async validateAdmin(email: string, password: string) {
-    try {
-      const admin = await this.findByEmail(email);
-      if (!admin) {
-        throw new HttpException(
-          "No admin with that email exists in our records",
-          HttpStatus.NOT_FOUND,
-        );
-      }
-
-      const isMatch = await bcrypt.compare(password, admin.password);
-      if (!isMatch) {
-        throw new HttpException("Invalid Password", HttpStatus.UNAUTHORIZED);
-      }
-
-      return {
-        email: admin.email,
-        id: admin.id,
-        name: admin.name,
-        profile_photo: admin.profile_photo,
-      };
-    } catch (error) {
-      throw error;
-    }
-  }
 
   async create(createAdminDto: CreateAdminDto) {
     try {

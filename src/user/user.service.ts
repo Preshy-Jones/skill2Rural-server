@@ -40,8 +40,6 @@ export class UserService {
 
       const user = await this.userRepository.findOneByEmail(email);
 
-      console.log(user, "user");
-
       //check if user already exists
       if (user) {
         throw new HttpException(
