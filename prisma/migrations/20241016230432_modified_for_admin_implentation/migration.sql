@@ -2,9 +2,13 @@
   Warnings:
 
   - The values [ADMIN] on the enum `Type` will be removed. If these variants are still used in the database, this will fail.
+  - You are about to drop the column `country` on the `User` table. All the data in the column will be lost.
   - You are about to drop the column `role` on the `User` table. All the data in the column will be lost.
 
 */
+-- CreateEnum
+CREATE TYPE "CourseStatus" AS ENUM ('ACTIVE', 'ARCHIVED');
+
 -- AlterEnum
 BEGIN;
 CREATE TYPE "Type_new" AS ENUM ('STUDENT', 'EDUCATOR');
@@ -20,4 +24,11 @@ COMMIT;
 ALTER TABLE "Admin" ALTER COLUMN "status" SET DEFAULT 'ACTIVE';
 
 -- AlterTable
-ALTER TABLE "User" DROP COLUMN "role";
+ALTER TABLE "Course" ADD COLUMN     "status" "CourseStatus" NOT NULL DEFAULT 'ACTIVE';
+
+-- AlterTable
+ALTER TABLE "CourseProgress" ADD COLUMN     "completedDateTime" TIMESTAMP(3);
+
+-- AlterTable
+ALTER TABLE "User" DROP COLUMN "country",
+DROP COLUMN "role";
