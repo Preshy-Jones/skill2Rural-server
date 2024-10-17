@@ -16,6 +16,8 @@ import { PrismaService } from "src/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { InviteAdminDto } from "./dto/invite-admin.dto";
+import { generatePassword, successResponse } from "src/common/utils";
+import { MailService } from "src/mail/mail.service";
 
 @Injectable()
 export class AdminService {
@@ -28,6 +30,7 @@ export class AdminService {
     private quizRepository: QuizRepository,
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async create(createAdminDto: CreateAdminDto) {
@@ -506,5 +509,52 @@ export class AdminService {
     }
   }
 
-  async inviteAdmin(inviteAdmin:InviteAdminDto) {}
+  async getAdmins() {
+    try {
+      const admins = await this.adminRepository.findAll();
+      return admins;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAdmin(id: string) {
+    try {
+      const admin = await this.adminRepository.findOne({ id: Number(id) });
+      return admin;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async inviteAdmin(inviteAdmin: InviteAdminDto) {
+    //generate password
+    const password = generatePassword(10);
+
+    //check if admin already exists
+    const admin = await this.adminRepository.findOneByEmail(inviteAdmin.email);
+    if (admin) {
+      throw new HttpException(
+        "Admin with that email already exists",
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    //create admin
+    const newAdmin = await this.adminRepository.create({
+      email: inviteAdmin.email,
+      name: inviteAdmin.name,
+      password,
+    });
+
+    //send email to admin
+    await this.mailService.sendMailNodeMailer({
+      to: newAdmin.email,
+      subject: "Admin Invitation",
+      text: `Hello ${newAdmin.name}, you have been invited to be an admin on our platform. Your password is ${password}`,
+      html: `<p>Hello ${newAdmin.name}, you have been invited to be an admin on our platform. Your password is ${password}</p>`,
+    });
+
+    return successResponse(null, "Admin invited successfully");
+  }
 }

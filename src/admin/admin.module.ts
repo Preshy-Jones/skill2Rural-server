@@ -12,9 +12,12 @@ import { CourseProgressRepository } from "src/course-progress/repositories/cours
 import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
+import { MailModule } from "src/mail/mail.module";
+import { MailService } from "src/mail/mail.service";
 
 @Module({
   imports: [
+    MailModule,
     QuestionModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -36,6 +39,7 @@ import { JwtModule } from "@nestjs/jwt";
     UserRepository,
     CourseProgressRepository,
     QuizRepository,
+    MailService
   ],
   exports: [AdminService],
 })
