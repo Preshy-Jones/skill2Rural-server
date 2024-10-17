@@ -28,24 +28,25 @@ import { CreateCourseDto } from "./dto/create-course.dto";
 import { AdminLoginGuard } from "src/common/guards/admin-login-guard";
 
 @ApiTags("Admin")
+@UseGuards(AdminAuthGuard)
 @Controller("admin")
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
-  // sign up
-  @ApiOperation({ summary: "Sign Up" })
-  @ApiResponse({
-    status: 201,
-    description: "Admin created successfully",
-  })
-  @ApiBody({
-    type: CreateAdminDto,
-  })
-  @Public()
-  @Post("register")
-  create(@Body() createAdminDto: CreateAdminDto) {
-    return this.adminService.create(createAdminDto);
-  }
+  // // sign up
+  // @ApiOperation({ summary: "Sign Up" })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: "Admin created successfully",
+  // })
+  // @ApiBody({
+  //   type: CreateAdminDto,
+  // })
+  // @Public()
+  // @Post("register")
+  // create(@Body() createAdminDto: CreateAdminDto) {
+  //   return this.adminService.create(createAdminDto);
+  // }
 
   //login
   @ApiOperation({ summary: "Login" })
@@ -66,7 +67,7 @@ export class AdminController {
   //Invite new admin User
 
   //dashboard analytics
-  @UseGuards(AdminAuthGuard)
+
   @ApiOperation({ summary: "Dashboard Analytics" })
   @Get("dashboard-analytics")
   @ApiBearerAuth()

@@ -67,7 +67,7 @@ export class AdminService {
         message: "Login successful",
         data: {
           accessToken: this.jwtService.sign(
-            { ...LoginAdminDto, isAdmin: false },
+            { ...LoginAdminDto, isAdmin: true },
             {
               expiresIn: "1d",
             },

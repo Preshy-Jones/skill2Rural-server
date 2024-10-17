@@ -6,17 +6,22 @@ import {
 import { AuthGuard } from "@nestjs/passport";
 
 @Injectable()
-export class AdminAuthGuard extends AuthGuard("admin") {}
-// export class AdminAuthGuard extends AuthGuard('jwt') {
-//   canActivate(context: ExecutionContext) {
-//     const request = context.switchToHttp().getRequest();
-//     const user = request.user;
+// export class AdminAuthGuard extends AuthGuard("admin") {}
+export class AdminAuthGuard extends AuthGuard("jwt") {
+  canActivate(context: ExecutionContext) {
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
 
-//     // Ensure the user is an admin
-//     if (!user || !user.isAdmin) {
-//       throw new UnauthorizedException('Admin privileges required');
-//     }
+    const path = request.url; // This gives you the route path
+    console.log(`Current route path: ${path}`);
+    if (path === '/admin/login') {
+      return true;
+    }
+    // Ensure the user is an admin
+    if (!user || !user.isAdmin) {
+      throw new UnauthorizedException("Admin privileges required");
+    }
 
-//     return true;
-//   }
-// }
+    return true;
+  }
+}
