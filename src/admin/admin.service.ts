@@ -9,7 +9,6 @@ import { CourseRepository } from "src/course/repositories/course.repository";
 import { CourseProgressRepository } from "src/course-progress/repositories/course-progress.repository";
 import { UserType } from "src/user/dto/create-educator.dto";
 import { subMonths } from "date-fns";
-import { Prisma } from "@prisma/client";
 import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
 import { CourseStatus, Period } from "src/common/global/interface";
 import { PrismaService } from "src/prisma.service";
@@ -19,7 +18,7 @@ import { InviteAdminDto } from "./dto/invite-admin.dto";
 import { generatePassword, successResponse } from "src/common/utils";
 import { MailService } from "src/mail/mail.service";
 import { UploadService } from "src/upload/upload.service";
-import { getVideoDurationInSeconds } from "get-video-duration";
+// import { getVideoDurationInSeconds } from "get-video-duration";
 
 @Injectable()
 export class AdminService {
@@ -524,18 +523,16 @@ export class AdminService {
         "videos",
       );
 
-      const videoDuration = await getVideoDurationInSeconds(
-        uploadedCourseVideo.fileUrl,
-      );
-
-      
+      // const videoDuration = await getVideoDurationInSeconds(
+      //   uploadedCourseVideo.fileUrl,
+      // );
 
       return {
         title,
         description,
         thumbnail: uploadedThumbnail.fileUrl,
         video: uploadedCourseVideo.fileUrl,
-        duration: videoDuration,
+        // duration: videoDuration,
       };
     } catch (error) {
       throw error;
