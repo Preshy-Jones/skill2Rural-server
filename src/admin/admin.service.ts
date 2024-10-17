@@ -502,13 +502,13 @@ export class AdminService {
 
       if (!files?.thumbnail_image) {
         throw new HttpException(
-          "Thumbnail image is required",
+          "Thumbnail image is required, key should be thumbnail_image",
           HttpStatus.BAD_REQUEST,
         );
       }
       if (!files?.course_video) {
         throw new HttpException(
-          "Course video is required",
+          "Course video is required, key should be course_video",
           HttpStatus.BAD_REQUEST,
         );
       }
