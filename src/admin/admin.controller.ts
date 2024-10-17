@@ -33,6 +33,7 @@ import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { AdminLoginGuard } from "src/common/guards/admin-login-guard";
 import multer, { diskStorage } from "multer";
+import {  InviteAdminDto } from "./dto/invite-admin.dto";
 const storage = multer.memoryStorage();
 
 export const multerOptions = {
@@ -132,6 +133,12 @@ export class AdminController {
   // Update user
 
   //Invite new admin User
+  @ApiOperation({ summary: "Invite New Admin User" })
+  @Post("invite-admin")
+  @ApiBearerAuth()
+  async inviteAdmin(@Body() inviteAdminDto: InviteAdminDto) {
+    return this.adminService.inviteAdmin(inviteAdminDto);
+  }
 }
 
 @ApiTags("Admin Course")

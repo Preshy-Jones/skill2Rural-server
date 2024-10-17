@@ -15,6 +15,7 @@ import { CourseStatus, Period } from "src/common/global/interface";
 import { PrismaService } from "src/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import { CreateCourseDto } from "./dto/create-course.dto";
+import { InviteAdminDto } from "./dto/invite-admin.dto";
 
 @Injectable()
 export class AdminService {
@@ -504,4 +505,6 @@ export class AdminService {
       throw error;
     }
   }
+
+  async inviteAdmin(inviteAdmin:InviteAdminDto) {}
 }
