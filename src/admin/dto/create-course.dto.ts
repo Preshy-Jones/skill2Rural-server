@@ -19,17 +19,6 @@ export class CreateCourseDto {
     required: false,
   })
   @IsString()
-  @IsOptional()
-  description?: string;
-
-  @ApiProperty({ description: "The duration of the course in hours" })
-  @IsNumber()
-  @Min(1)
-  @Max(100)
-  duration: number;
-
-  @ApiProperty({ description: "The instructor of the course" })
-  @IsString()
   @IsNotEmpty()
-  instructor: string;
+  description?: string;
 }

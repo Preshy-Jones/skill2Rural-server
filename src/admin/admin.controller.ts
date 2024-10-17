@@ -8,6 +8,9 @@ import {
   Param,
   UploadedFile,
   Request,
+  UploadedFiles,
+  HttpException,
+  HttpStatus,
 } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import {
@@ -20,33 +23,54 @@ import {
 import { CreateAdminDto } from "./dto/create-admin.dto";
 import { LoginAdminDto } from "./dto/login-admin.dto";
 import { AdminAuthGuard } from "src/common/guards/admin-auth.guard";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { multerOptions } from "src/config/multer.config";
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from "@nestjs/platform-express";
+
 import { Period } from "src/common/global/interface";
 import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { AdminLoginGuard } from "src/common/guards/admin-login-guard";
+import multer, { diskStorage } from "multer";
+const storage = multer.memoryStorage();
 
-@ApiTags("Admin")
+export const multerOptions = {
+  storage,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100 MB file size limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.fieldname === "thumbnail_image") {
+      if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|svg(\+xml)?)$/)) {
+        return cb(
+          new HttpException(
+            "Only image files are allowed for thumbnail!",
+            HttpStatus.BAD_REQUEST,
+          ),
+          false,
+        );
+      }
+    } else if (file.fieldname === "course_video") {
+      if (!file.mimetype.match(/^video\//)) {
+        return cb(
+          new HttpException(
+            "Only video files are allowed for course video!",
+            HttpStatus.BAD_REQUEST,
+          ),
+          false,
+        );
+      }
+    }
+    cb(null, true);
+  },
+};
+
+@ApiTags("Admin user")
 @UseGuards(AdminAuthGuard)
 @Controller("admin")
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
-
-  // // sign up
-  // @ApiOperation({ summary: "Sign Up" })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: "Admin created successfully",
-  // })
-  // @ApiBody({
-  //   type: CreateAdminDto,
-  // })
-  // @Public()
-  // @Post("register")
-  // create(@Body() createAdminDto: CreateAdminDto) {
-  //   return this.adminService.create(createAdminDto);
-  // }
 
   //login
   @ApiOperation({ summary: "Login" })
@@ -63,8 +87,6 @@ export class AdminController {
   async login(@Request() req) {
     return this.adminService.login(req.user);
   }
-
-  //Invite new admin User
 
   //dashboard analytics
 
@@ -106,9 +128,14 @@ export class AdminController {
   async getUserCourses(@Param("id") id: string) {
     return this.adminService.getUserCourses(id);
   }
+
+  // Update user
+
+  //Invite new admin User
 }
 
 @ApiTags("Admin Course")
+@UseGuards(AdminAuthGuard)
 @Controller("admin/course")
 export class AdminCourseController {
   constructor(private readonly adminService: AdminService) {}
@@ -159,12 +186,23 @@ export class AdminCourseController {
   })
   @ApiBearerAuth()
   @Post("create-course")
-  @UseInterceptors(FileInterceptor("file", multerOptions))
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: "course_video", maxCount: 1 },
+        { name: "thumbnail_image", maxCount: 1 },
+      ],
+      multerOptions,
+    ),
+  )
   async createCourse(
-    @Body() body: any,
-    @UploadedFile()
-    file: Express.Multer.File,
+    @Body() createCourseDto: CreateCourseDto,
+    @UploadedFiles()
+    files: {
+      course_video?: Express.Multer.File[];
+      thumbnail_image?: Express.Multer.File[];
+    },
   ) {
-    return this.adminService.createCourse();
+    return this.adminService.createCourse(createCourseDto, files);
   }
 }

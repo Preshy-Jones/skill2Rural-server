@@ -14,6 +14,7 @@ import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
 import { CourseStatus, Period } from "src/common/global/interface";
 import { PrismaService } from "src/prisma.service";
 import { JwtService } from "@nestjs/jwt";
+import { CreateCourseDto } from "./dto/create-course.dto";
 
 @Injectable()
 export class AdminService {
@@ -77,10 +78,6 @@ export class AdminService {
     } catch (error) {
       throw error;
     }
-  }
-
-  async createCourse() {
-    return "This action adds a new course";
   }
 
   async createQuestion() {
@@ -485,5 +482,26 @@ export class AdminService {
     );
 
     return courses;
+  }
+
+  async createCourse(createCourseDto: CreateCourseDto, files: any) {
+    try {
+      const { title, description } = createCourseDto;
+
+      if (!files?.thumbnail_image) {
+        throw new HttpException(
+          "Thumbnail image is required",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      if (!files?.course_video) {
+        throw new HttpException(
+          "Course video is required",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    } catch (error) {
+      throw error;
+    }
   }
 }
