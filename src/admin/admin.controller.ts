@@ -220,6 +220,7 @@ export class AdminCourseController {
   )
   async createCourse(
     @Body() createCourseDto: CreateCourseDto,
+    
     @UploadedFiles()
     files: {
       course_video?: Express.Multer.File[];

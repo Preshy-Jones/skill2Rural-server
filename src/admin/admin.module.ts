@@ -14,10 +14,12 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { MailModule } from "src/mail/mail.module";
 import { MailService } from "src/mail/mail.service";
+import { UploadModule } from "src/upload/upload.module";
 
 @Module({
   imports: [
     MailModule,
+    UploadModule,
     QuestionModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

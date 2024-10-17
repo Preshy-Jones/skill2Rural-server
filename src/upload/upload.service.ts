@@ -36,7 +36,7 @@ export class UploadService {
       return {
         originalname: file.originalname,
         filename: file.filename,
-        imageUrl: `https://${bucketName}.s3.${bucketRegion}.amazonaws.com/${basePath ? basePath + "/" : ""}${randomKey}-${file.originalname}`,
+        fileUrl: `https://${bucketName}.s3.${bucketRegion}.amazonaws.com/${basePath ? basePath + "/" : ""}${randomKey}-${file.originalname}`,
       };
     } catch (error) {
       console.log(error);

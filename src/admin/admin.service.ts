@@ -18,6 +18,8 @@ import { CreateCourseDto } from "./dto/create-course.dto";
 import { InviteAdminDto } from "./dto/invite-admin.dto";
 import { generatePassword, successResponse } from "src/common/utils";
 import { MailService } from "src/mail/mail.service";
+import { UploadService } from "src/upload/upload.service";
+import { getVideoDurationInSeconds } from "get-video-duration";
 
 @Injectable()
 export class AdminService {
@@ -31,6 +33,7 @@ export class AdminService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private mailService: MailService,
+    private uploadService: UploadService,
   ) {}
 
   async create(createAdminDto: CreateAdminDto) {
@@ -488,7 +491,13 @@ export class AdminService {
     return courses;
   }
 
-  async createCourse(createCourseDto: CreateCourseDto, files: any) {
+  async createCourse(
+    createCourseDto: CreateCourseDto,
+    files: {
+      course_video?: Express.Multer.File[];
+      thumbnail_image?: Express.Multer.File[];
+    },
+  ) {
     try {
       const { title, description } = createCourseDto;
 
@@ -504,6 +513,30 @@ export class AdminService {
           HttpStatus.BAD_REQUEST,
         );
       }
+
+      const uploadedThumbnail = await this.uploadService.s3UploadFile(
+        files.thumbnail_image[0],
+        "thumbnails",
+      );
+
+      const uploadedCourseVideo = await this.uploadService.s3UploadFile(
+        files.course_video[0],
+        "videos",
+      );
+
+      const videoDuration = await getVideoDurationInSeconds(
+        uploadedCourseVideo.fileUrl,
+      );
+
+      
+
+      return {
+        title,
+        description,
+        thumbnail: uploadedThumbnail.fileUrl,
+        video: uploadedCourseVideo.fileUrl,
+        duration: videoDuration,
+      };
     } catch (error) {
       throw error;
     }

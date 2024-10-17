@@ -115,7 +115,7 @@ export class UserService {
           "profile_photos",
         );
 
-        updateUserDto.profile_photo = uploadedPhoto.imageUrl;
+        updateUserDto.profile_photo = uploadedPhoto.fileUrl;
       }
 
       return this.userRepository.update({
