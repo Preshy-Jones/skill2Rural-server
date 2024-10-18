@@ -570,11 +570,13 @@ export class AdminService {
       );
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     //create admin
     const newAdmin = await this.adminRepository.create({
       email: inviteAdmin.email,
       name: inviteAdmin.name,
-      password,
+      password: hashedPassword,
     });
 
     //send email to admin
