@@ -1,5 +1,5 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { nanoid } from "nanoid";
 
@@ -40,6 +40,10 @@ export class UploadService {
       };
     } catch (error) {
       console.log(error);
+      throw new HttpException(
+        "Error uploading file",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
     // return {
     //   originalname: file.originalname,

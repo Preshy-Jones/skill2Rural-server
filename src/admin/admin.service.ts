@@ -577,13 +577,22 @@ export class AdminService {
         "videos",
       );
 
-      return {
+      //create course
+      const newCourse = await this.courseRepository.create({
         title,
         description,
         thumbnail: uploadedThumbnail.fileUrl,
         video: uploadedCourseVideo.fileUrl,
         duration,
-      };
+      });
+      return successResponse(newCourse, "Course created successfully");
+      // return {
+      //   title,
+      //   description,
+      //   thumbnail: uploadedThumbnail.fileUrl,
+      //   video: uploadedCourseVideo.fileUrl,
+      //   duration,
+      // };
     } catch (error) {
       throw error;
     }
