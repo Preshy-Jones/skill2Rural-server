@@ -21,10 +21,6 @@ export class CourseService {
     private certificateRepository: CertificateRepository,
   ) {}
 
-  create(createCourseDto: CreateCourseDto) {
-    return this.courseRepository.create(createCourseDto);
-  }
-
   async findAll() {
     try {
       const courses = await this.courseRepository.coursesSelect(

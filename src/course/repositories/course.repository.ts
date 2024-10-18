@@ -6,7 +6,7 @@ import { PrismaService } from "src/prisma.service";
 export class CourseRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(data) {
+  async create(data: Prisma.CourseCreateInput) {
     return this.prisma.course.create({
       data,
     });

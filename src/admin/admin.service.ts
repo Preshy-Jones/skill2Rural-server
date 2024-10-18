@@ -581,18 +581,11 @@ export class AdminService {
       const newCourse = await this.courseRepository.create({
         title,
         description,
-        thumbnail: uploadedThumbnail.fileUrl,
-        video: uploadedCourseVideo.fileUrl,
+        thumbnail_image: uploadedThumbnail.fileUrl,
+        video_url: uploadedCourseVideo.fileUrl,
         duration,
       });
       return successResponse(newCourse, "Course created successfully");
-      // return {
-      //   title,
-      //   description,
-      //   thumbnail: uploadedThumbnail.fileUrl,
-      //   video: uploadedCourseVideo.fileUrl,
-      //   duration,
-      // };
     } catch (error) {
       throw error;
     }
