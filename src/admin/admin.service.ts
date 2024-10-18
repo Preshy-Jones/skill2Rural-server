@@ -18,7 +18,15 @@ import { InviteAdminDto } from "./dto/invite-admin.dto";
 import { generatePassword, successResponse } from "src/common/utils";
 import { MailService } from "src/mail/mail.service";
 import { UploadService } from "src/upload/upload.service";
+import * as ffmpeg from "fluent-ffmpeg";
+import * as ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
+import * as ffprobeInstaller from "@ffprobe-installer/ffprobe";
+import * as tmp from "tmp";
+import * as fs from "fs";
 // import { getVideoDurationInSeconds } from "get-video-duration";
+
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 @Injectable()
 export class AdminService {
@@ -33,7 +41,10 @@ export class AdminService {
     private jwtService: JwtService,
     private mailService: MailService,
     private uploadService: UploadService,
-  ) {}
+  ) {
+    // ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+    // ffmpeg.setFfprobePath(ffprobeInstaller.path);
+  }
 
   async create(createAdminDto: CreateAdminDto) {
     try {
@@ -416,7 +427,7 @@ export class AdminService {
   }
 
   async getCertificateDistributionForYear(year: number) {
-    const currentYear = new Date().getFullYear();
+    // const currentYear = new Date().getFullYear();
 
     // Get the total number of certificates for each month in the year
 
@@ -490,6 +501,46 @@ export class AdminService {
     return courses;
   }
 
+  // async getVideoDuration(filePath: string): Promise<number> {
+  //   return new Promise((resolve, reject) => {
+  //     ffmpeg.ffprobe(filePath, (err, metadata) => {
+  //       if (err) {
+  //         return reject(err);
+  //       }
+  //       const duration = metadata.format.duration;
+  //       resolve(duration); // duration in seconds
+  //     });
+  //   });
+  // }
+  private async getVideoDuration(buffer: Buffer): Promise<number> {
+    return new Promise((resolve, reject) => {
+      // Create a temporary file
+      tmp.file((err, path, fd, cleanupCallback) => {
+        if (err) {
+          return reject(err);
+        }
+
+        // Write the buffer to the temporary file
+        fs.writeFile(path, buffer, (writeErr) => {
+          if (writeErr) {
+            cleanupCallback();
+            return reject(writeErr);
+          }
+
+          // Use ffprobe on the temporary file
+          ffmpeg.ffprobe(path, (probeErr, metadata) => {
+            cleanupCallback(); // Always cleanup the temporary file
+
+            if (probeErr) {
+              return reject(probeErr);
+            }
+
+            resolve(metadata.format.duration);
+          });
+        });
+      });
+    });
+  }
   async createCourse(
     createCourseDto: CreateCourseDto,
     files: {
@@ -512,6 +563,9 @@ export class AdminService {
           HttpStatus.BAD_REQUEST,
         );
       }
+      const duration = await this.getVideoDuration(
+        files.course_video[0].buffer,
+      );
 
       const uploadedThumbnail = await this.uploadService.s3UploadFile(
         files.thumbnail_image[0],
@@ -523,16 +577,12 @@ export class AdminService {
         "videos",
       );
 
-      // const videoDuration = await getVideoDurationInSeconds(
-      //   uploadedCourseVideo.fileUrl,
-      // );
-
       return {
         title,
         description,
         thumbnail: uploadedThumbnail.fileUrl,
         video: uploadedCourseVideo.fileUrl,
-        // duration: videoDuration,
+        duration,
       };
     } catch (error) {
       throw error;

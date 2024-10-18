@@ -22,14 +22,14 @@ export const decodeToken = (token, jwtService: JwtService) => {
   });
 };
 
-
 // make a function that generates a random password, which is a combination of Uppercase, Lowercase,number and special characters
-export const generatePassword = (length:number) => {
-  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
+export const generatePassword = (length: number) => {
+  const charset =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+";
   let password = "";
   for (let i = 0; i < length; i++) {
-    let at = Math.floor(Math.random() * (charset.length + 1));
+    const at = Math.floor(Math.random() * (charset.length + 1));
     password += charset.charAt(at);
   }
   return password;
-}
+};
