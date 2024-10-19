@@ -59,7 +59,7 @@ model Course {
   questions   CourseQuestion[]
   Quiz        Quiz[]
   Certificate Certificate[]
-  status      CourseStatus     @default(INACTIVE)
+  status      CourseStatus     @default(ACTIVE)
 }
 
 model CourseProgress {
@@ -154,5 +154,4 @@ enum AdminStatus {
 enum CourseStatus {
   ACTIVE
   ARCHIVED
-  INACTIVE
 }
