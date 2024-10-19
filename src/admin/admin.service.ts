@@ -23,6 +23,9 @@ import * as ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
 import * as ffprobeInstaller from "@ffprobe-installer/ffprobe";
 import * as tmp from "tmp";
 import * as fs from "fs";
+import { CourseQuestionRepository } from "src/course/repositories/question.repository";
+import { CreateCourseQuestionDto } from "./dto/create-course-question.dto";
+import { UpdateCourseDto } from "./dto/update-course.dto";
 // import { getVideoDurationInSeconds } from "get-video-duration";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -37,6 +40,7 @@ export class AdminService {
     private courseProgressRepository: CourseProgressRepository,
     private courseRepository: CourseRepository,
     private quizRepository: QuizRepository,
+    private courseQuestion: CourseQuestionRepository,
     private prisma: PrismaService,
     private jwtService: JwtService,
     private mailService: MailService,
@@ -97,8 +101,40 @@ export class AdminService {
     }
   }
 
-  async createQuestion() {
-    return "This action adds a new question";
+  async createQuestion(createCourseQuestionDto: CreateCourseQuestionDto) {
+    try {
+      const { question, options, answer, courseId, point } =
+        createCourseQuestionDto;
+
+      // Check if course exists
+      const course = await this.courseRepository.findOne({ id: courseId });
+      if (!course) {
+        throw new HttpException(
+          "Course does not exist",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Create the question
+      const newQuestion = await this.courseQuestion.create({
+        question,
+        options,
+        answer,
+        point,
+        course: {
+          connect: {
+            id: course.id,
+          },
+        },
+      });
+
+      return {
+        message: "Question created successfully",
+        data: newQuestion,
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findByEmail(email: string) {
@@ -586,6 +622,46 @@ export class AdminService {
         duration,
       });
       return successResponse(newCourse, "Course created successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateCourse(
+    updateCourseDto: UpdateCourseDto,
+    thumbnail_image: Express.Multer.File,
+    courseId: string,
+  ) {
+    try {
+      const { title, description } = updateCourseDto;
+
+      //check if course exists
+      const course = await this.courseRepository.findOne({
+        id: Number(courseId),
+      });
+
+      if (!course) {
+        throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
+      }
+
+      //check if thumbnail image exists
+      if (thumbnail_image) {
+        //upload thumbnail image
+        const uploadedThumbnail = await this.uploadService.s3UploadFile(
+          thumbnail_image,
+          "thumbnails",
+        );
+
+        updateCourseDto.thumbnail_image = uploadedThumbnail.fileUrl;
+      }
+
+      //update course
+      const updatedCourse = await this.courseRepository.update({
+        where: { id: Number(courseId) },
+        data: updateCourseDto,
+      });
+
+      return successResponse(updatedCourse, "Course updated successfully");
     } catch (error) {
       throw error;
     }

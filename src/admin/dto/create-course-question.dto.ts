@@ -1,28 +1,60 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsNotEmpty, IsOptional } from "class-validator";
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  Max,
+  Min,
+  ArrayNotEmpty,
+  ArrayMaxSize,
+} from "class-validator";
 
 export class CreateCourseQuestionDto {
   @ApiProperty({
-    description: "The title of the course question",
+    description: "The question",
     example: "What is TypeScript?",
   })
-  @IsString()
   @IsNotEmpty()
-  title: string;
+  @IsString()
+  question: string;
+  @ApiProperty({
+    description: "The answer (index of the correct option)",
+    example: 0,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  @Max(4)
+  @Min(0)
+  answer: number;
 
   @ApiProperty({
-    description: "The description of the course question",
-    example: "Explain the basics of TypeScript.",
+    description: "The point",
+    example: 10,
   })
-  @IsString()
-  @IsOptional()
-  description?: string;
+  @IsNotEmpty()
+  @IsNumber()
+  point: number;
 
   @ApiProperty({
-    description: "The ID of the course this question belongs to",
-    example: "12345",
+    description: "The options",
+    example: [
+      "A superset of JavaScript",
+      "A programming language",
+      "A framework",
+      "A library",
+    ],
   })
-  @IsString()
   @IsNotEmpty()
-  courseId: string;
+  @IsString({ each: true })
+  @ArrayNotEmpty()
+  @ArrayMaxSize(5)
+  options: string[];
+
+  @ApiProperty({
+    description: "The course id",
+    example: 1,
+  })
+  @IsNotEmpty()
+  @IsNumber()
+  courseId: number;
 }

@@ -6,11 +6,12 @@ import {
   UseInterceptors,
   Get,
   Param,
-  UploadedFile,
   Request,
   UploadedFiles,
   HttpException,
   HttpStatus,
+  Patch,
+  UploadedFile,
 } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import {
@@ -20,7 +21,6 @@ import {
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import { CreateAdminDto } from "./dto/create-admin.dto";
 import { LoginAdminDto } from "./dto/login-admin.dto";
 import { AdminAuthGuard } from "src/common/guards/admin-auth.guard";
 import {
@@ -32,8 +32,10 @@ import { Period } from "src/common/global/interface";
 import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 import { CreateCourseDto } from "./dto/create-course.dto";
 import { AdminLoginGuard } from "src/common/guards/admin-login-guard";
-import multer, { diskStorage } from "multer";
+import multer from "multer";
 import { InviteAdminDto } from "./dto/invite-admin.dto";
+import { CreateCourseQuestionDto } from "./dto/create-course-question.dto";
+import { UpdateCourseDto } from "./dto/update-course.dto";
 const storage = multer.memoryStorage();
 
 export const multerOptions = {
@@ -191,9 +193,12 @@ export class AdminCourseController {
 
   //create Question
   @ApiOperation({ summary: "Create Question" })
+  @ApiBearerAuth()
   @Post("create-question")
-  async createQuestion() {
-    return this.adminService.createQuestion();
+  async createQuestion(
+    @Body() createCourseQuestionDto: CreateCourseQuestionDto,
+  ) {
+    return this.adminService.createQuestion(createCourseQuestionDto);
   }
 
   //create Course
@@ -220,7 +225,7 @@ export class AdminCourseController {
   )
   async createCourse(
     @Body() createCourseDto: CreateCourseDto,
-    
+
     @UploadedFiles()
     files: {
       course_video?: Express.Multer.File[];
@@ -228,5 +233,33 @@ export class AdminCourseController {
     },
   ) {
     return this.adminService.createCourse(createCourseDto, files);
+  }
+
+  @Patch("")
+  @UseInterceptors(FileInterceptor("thumbnail_image", multerOptions))
+  @ApiOperation({
+    summary: "Update user",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "The record has been successfully updated.",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden." })
+  @ApiBody({
+    type: UpdateCourseDto,
+    description: "Json structure for user object",
+  })
+  update(
+    @Body() updateCourseDto: UpdateCourseDto,
+    @Request() req,
+    @Param("courseId") courseId: string,
+    @UploadedFile()
+    thumbnail_image: Express.Multer.File,
+  ) {
+    return this.adminService.updateCourse(
+      updateCourseDto,
+      thumbnail_image,
+      courseId,
+    );
   }
 }
