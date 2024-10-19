@@ -137,6 +137,33 @@ export class AdminService {
     }
   }
 
+  async getCourseQuestions(courseId: string) {
+    try {
+      // Check if course exists
+      const course = await this.courseRepository.findOne({
+        id: Number(courseId),
+      });
+      if (!course) {
+        throw new HttpException(
+          "Course does not exist",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Get the questions for the course
+      const questions = await this.courseQuestion.courseQuestions({
+        courseId: Number(courseId),
+      });
+
+      return {
+        message: "Questions retrieved successfully",
+        data: questions,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async findByEmail(email: string) {
     return this.adminRepository.findOneByEmail(email);
   }
@@ -535,6 +562,22 @@ export class AdminService {
     );
 
     return courses;
+  }
+
+  async getCourse(courseId: string) {
+    try {
+      const course = await this.courseRepository.findOne({
+        id: Number(courseId),
+      });
+
+      if (!course) {
+        throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
+      }
+
+      return course;
+    } catch (error) {
+      throw error;
+    }
   }
 
   // async getVideoDuration(filePath: string): Promise<number> {

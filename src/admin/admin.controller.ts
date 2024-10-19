@@ -191,6 +191,14 @@ export class AdminCourseController {
     return this.adminService.getAllCourses();
   }
 
+  // Get course
+  @ApiOperation({ summary: "Get Course" })
+  @Get(":courseId")
+  @ApiBearerAuth()
+  async getCourse(@Param("courseId") courseId: string) {
+    return this.adminService.getCourse(courseId);
+  }
+
   //create Question
   @ApiOperation({ summary: "Create Question" })
   @ApiBearerAuth()
@@ -199,6 +207,14 @@ export class AdminCourseController {
     @Body() createCourseQuestionDto: CreateCourseQuestionDto,
   ) {
     return this.adminService.createQuestion(createCourseQuestionDto);
+  }
+
+  // Get a course's questions
+  @ApiOperation({ summary: "Get Course Questions" })
+  @Get(":courseId/questions")
+  @ApiBearerAuth()
+  async getCourseQuestions(@Param("courseId") courseId: string) {
+    return this.adminService.getCourseQuestions(courseId);
   }
 
   //create Course

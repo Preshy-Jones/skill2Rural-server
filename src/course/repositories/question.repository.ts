@@ -14,7 +14,7 @@ export class CourseQuestionRepository {
     });
   }
 
-  async courseQuestion(
+  async courseQuestions(
     where: Prisma.CourseQuestionWhereInput,
     include?: Prisma.CourseQuestionInclude,
   ) {
