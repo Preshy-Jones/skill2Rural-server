@@ -41,7 +41,7 @@ import { UploadModule } from "src/upload/upload.module";
     UserRepository,
     CourseProgressRepository,
     QuizRepository,
-    MailService
+    MailService,
   ],
   exports: [AdminService],
 })

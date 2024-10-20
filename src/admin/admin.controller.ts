@@ -36,6 +36,8 @@ import multer from "multer";
 import { InviteAdminDto } from "./dto/invite-admin.dto";
 import { CreateCourseQuestionDto } from "./dto/create-course-question.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
+import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
+import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 const storage = multer.memoryStorage();
 
 export const multerOptions = {
@@ -91,6 +93,14 @@ export class AdminController {
     return this.adminService.login(req.user);
   }
 
+  // Get logged in admin user
+  @ApiOperation({ summary: "Get Logged in Admin User" })
+  @Get("me")
+  @ApiBearerAuth()
+  async getMe(@Request() req) {
+    return this.adminService.getMe(req.user.id);
+  }
+
   //dashboard analytics
 
   @ApiOperation({ summary: "Dashboard Analytics" })
@@ -132,8 +142,31 @@ export class AdminController {
     return this.adminService.getUserCourses(id);
   }
 
-  // Update user
-
+  // Update admin user
+  @Patch("")
+  @UseInterceptors(FileInterceptor("file", multerOptions))
+  @ApiOperation({
+    summary: "Update user",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "The record has been successfully updated.",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden." })
+  @ApiBody({
+    type: UpdateAdminUserDto,
+    description: "Json structure for user object",
+  })
+  @ApiBearerAuth()
+  update(
+    @Body() updateAdminUserDto: UpdateAdminUserDto,
+    @Request() req,
+    @UploadedFile()
+    profile_photo: Express.Multer.File,
+  ) {
+    const userId = req.user.id;
+    return this.adminService.update(userId, updateAdminUserDto, profile_photo);
+  }
   //get Admin Users
   @ApiOperation({ summary: "Get Admin Users" })
   @Get("admins")
@@ -156,6 +189,31 @@ export class AdminController {
   @ApiBearerAuth()
   async inviteAdmin(@Body() inviteAdminDto: InviteAdminDto) {
     return this.adminService.inviteAdmin(inviteAdminDto);
+  }
+
+  // // change password
+  @Patch("change-password")
+  @ApiOperation({
+    summary: "Change Password",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Password changed successfully",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden." })
+  @ApiBody({
+    type: AdminChangePasswordDto,
+    description: "Json structure for change password object",
+  })
+  @ApiBearerAuth()
+  changePassword(
+    @Body() adminChangePasswordDto: AdminChangePasswordDto,
+    @Request() req,
+  ) {
+    return this.adminService.changePassword(
+      adminChangePasswordDto,
+      req.user.id,
+    );
   }
 }
 
@@ -254,7 +312,7 @@ export class AdminCourseController {
   @Patch("")
   @UseInterceptors(FileInterceptor("thumbnail_image", multerOptions))
   @ApiOperation({
-    summary: "Update user",
+    summary: "Update Course",
   })
   @ApiResponse({
     status: 200,

@@ -26,6 +26,9 @@ import * as fs from "fs";
 import { CourseQuestionRepository } from "src/course/repositories/question.repository";
 import { CreateCourseQuestionDto } from "./dto/create-course-question.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
+import { ChangePasswordDto } from "src/user/dto/changePassword.dto";
+import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
+import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 // import { getVideoDurationInSeconds } from "get-video-duration";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -83,6 +86,24 @@ export class AdminService {
       throw error;
     }
   }
+
+  async getMe(adminUserId: number) {
+    try {
+      const admin = await this.adminRepository.findOne({ id: adminUserId });
+      if (!admin) {
+        throw new HttpException("Admin not found", HttpStatus.NOT_FOUND);
+      }
+
+      return {
+        id: admin.id,
+        email: admin.email,
+        name: admin.name,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async login(LoginAdminDto: LoginAdminDto) {
     try {
       return {
@@ -96,6 +117,40 @@ export class AdminService {
           ),
         },
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  //update user
+  async update(
+    id: number,
+    updateUserDto: UpdateAdminUserDto,
+    profile_photo: Express.Multer.File,
+  ) {
+    try {
+      //check if user exists
+      const adminUser = await this.adminRepository.findOne({ id });
+
+      if (!adminUser) {
+        throw new HttpException("Admin User not found", HttpStatus.NOT_FOUND);
+      }
+
+      //check if profile photo exists
+      if (profile_photo) {
+        //upload profile photo
+        const uploadedPhoto = await this.uploadService.s3UploadFile(
+          profile_photo,
+          "admin_profile_photos",
+        );
+
+        updateUserDto.profile_photo = uploadedPhoto.fileUrl;
+      }
+
+      return this.adminRepository.update({
+        where: { id },
+        data: updateUserDto,
+      });
     } catch (error) {
       throw error;
     }
@@ -759,5 +814,46 @@ export class AdminService {
     });
 
     return successResponse(null, "Admin invited successfully");
+  }
+  async changePassword(
+    adminChangePasswordDto: AdminChangePasswordDto,
+    adminUserId: number,
+  ) {
+    try {
+      const { oldPassword, newPassword, confirmPassword } =
+        adminChangePasswordDto;
+
+      //check if password and confirm password match
+      if (newPassword !== confirmPassword) {
+        throw new HttpException(
+          "Password and confirm password do not match",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const adminUser = await this.adminRepository.findOne({
+        id: adminUserId,
+      });
+
+      //check if old password matches
+      const isMatch = await bcrypt.compare(oldPassword, adminUser.password);
+
+      if (!isMatch) {
+        throw new HttpException("Invalid old password", HttpStatus.BAD_REQUEST);
+      }
+
+      //hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+      //update user password
+      await this.adminRepository.update({
+        where: { email: adminUser.email },
+        data: { password: hashedPassword },
+      });
+
+      return successResponse({}, "Password changed successfully");
+    } catch (error) {
+      throw error;
+    }
   }
 }
