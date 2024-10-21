@@ -27,4 +27,12 @@ export class CourseQuestionRepository {
   async findMany() {
     return this.prisma.courseQuestion.findMany();
   }
+
+  async createMany(
+    data: Prisma.CourseQuestionCreateManyInput[],
+  ): Promise<Prisma.BatchPayload> {
+    return this.prisma.courseQuestion.createMany({
+      data,
+    });
+  }
 }

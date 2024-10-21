@@ -38,6 +38,7 @@ import { CreateCourseQuestionDto } from "./dto/create-course-question.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
 import { UpdateAdminUserDto } from "./dto/update-admin.dto";
+import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
 const storage = multer.memoryStorage();
 
 export const multerOptions = {
@@ -265,6 +266,16 @@ export class AdminCourseController {
     @Body() createCourseQuestionDto: CreateCourseQuestionDto,
   ) {
     return this.adminService.createQuestion(createCourseQuestionDto);
+  }
+
+  // create questions
+  @ApiOperation({ summary: "Create Questions" })
+  @ApiBearerAuth()
+  @Post("create-questions")
+  async createQuestions(
+    @Body() createCourseQuestionsDto: CreateCourseQuestionsDto,
+  ) {
+    return this.adminService.createQuestions(createCourseQuestionsDto);
   }
 
   // Get a course's questions

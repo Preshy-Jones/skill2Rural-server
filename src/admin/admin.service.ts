@@ -29,6 +29,7 @@ import { UpdateCourseDto } from "./dto/update-course.dto";
 import { ChangePasswordDto } from "src/user/dto/changePassword.dto";
 import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
 import { UpdateAdminUserDto } from "./dto/update-admin.dto";
+import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
 // import { getVideoDurationInSeconds } from "get-video-duration";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -43,7 +44,7 @@ export class AdminService {
     private courseProgressRepository: CourseProgressRepository,
     private courseRepository: CourseRepository,
     private quizRepository: QuizRepository,
-    private courseQuestion: CourseQuestionRepository,
+    private courseQuestionRepository: CourseQuestionRepository,
     private prisma: PrismaService,
     private jwtService: JwtService,
     private mailService: MailService,
@@ -171,7 +172,7 @@ export class AdminService {
       }
 
       // Create the question
-      const newQuestion = await this.courseQuestion.create({
+      const newQuestion = await this.courseQuestionRepository.create({
         question,
         options,
         answer,
@@ -192,6 +193,40 @@ export class AdminService {
     }
   }
 
+  async createQuestions(createCourseQuestionsDto: CreateCourseQuestionsDto) {
+    try {
+      // Check if course exists
+      const course = await this.courseRepository.findOne({
+        id: createCourseQuestionsDto[0].courseId,
+      });
+      if (!course) {
+        throw new HttpException(
+          "Course does not exist",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Create the questions
+      const questions = createCourseQuestionsDto.questions;
+      const newQuestions = await this.courseQuestionRepository.createMany(
+        questions.map((question) => ({
+          question: question.question,
+          options: question.options,
+          answer: question.answer,
+          point: question.point,
+          courseId: course.id,
+        })),
+      );
+
+      return {
+        message: "Questions created successfully",
+        data: newQuestions,
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getCourseQuestions(courseId: string) {
     try {
       // Check if course exists
@@ -206,7 +241,7 @@ export class AdminService {
       }
 
       // Get the questions for the course
-      const questions = await this.courseQuestion.courseQuestions({
+      const questions = await this.courseQuestionRepository.courseQuestions({
         courseId: Number(courseId),
       });
 
