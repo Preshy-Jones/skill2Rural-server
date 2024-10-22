@@ -197,7 +197,7 @@ export class AdminService {
     try {
       // Check if course exists
       const course = await this.courseRepository.findOne({
-        id: createCourseQuestionsDto[0].courseId,
+        id: createCourseQuestionsDto.courseId,
       });
       if (!course) {
         throw new HttpException(
