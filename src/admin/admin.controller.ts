@@ -334,6 +334,7 @@ export class AdminCourseController {
     type: UpdateCourseDto,
     description: "Json structure for user object",
   })
+  @ApiBearerAuth()
   update(
     @Body() updateCourseDto: UpdateCourseDto,
     @Request() req,
