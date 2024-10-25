@@ -278,6 +278,32 @@ export class AdminCourseController {
     return this.adminService.createQuestion(createCourseQuestionDto);
   }
 
+  // Update Question
+  @Patch("update-question/:questionId")
+  @ApiOperation({
+    summary: "Update Question",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "The record has been successfully updated.",
+  })
+  @ApiResponse({ status: 403, description: "Forbidden." })
+  @ApiBody({
+    type: CreateCourseQuestionDto,
+    description: "Json structure for user object",
+  })
+  @ApiBearerAuth()
+  updateQuestion(
+    @Body() createCourseQuestionDto: CreateCourseQuestionDto,
+    @Request() req,
+    @Param("questionId") questionId: string,
+  ) {
+    return this.adminService.updateQuestion(
+      createCourseQuestionDto,
+      questionId,
+    );
+  }
+
   // create questions
   @ApiOperation({ summary: "Create Questions" })
   @ApiBearerAuth()

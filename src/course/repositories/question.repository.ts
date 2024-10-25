@@ -35,4 +35,14 @@ export class CourseQuestionRepository {
       data,
     });
   }
+
+  async update(
+    where: Prisma.CourseQuestionWhereUniqueInput,
+    data: Prisma.CourseQuestionUpdateInput,
+  ): Promise<CourseQuestion> {
+    return this.prisma.courseQuestion.update({
+      where,
+      data,
+    });
+  }
 }

@@ -26,11 +26,11 @@ import * as fs from "fs";
 import { CourseQuestionRepository } from "src/course/repositories/question.repository";
 import { CreateCourseQuestionDto } from "./dto/create-course-question.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
-import { ChangePasswordDto } from "src/user/dto/changePassword.dto";
 import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
 import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
 import { CourseStatus } from "@prisma/client";
+import { UpdateCourseQuestionDto } from "./dto/update-course-question.dto";
 // import { getVideoDurationInSeconds } from "get-video-duration";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -189,6 +189,41 @@ export class AdminService {
         message: "Question created successfully",
         data: newQuestion,
       };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateQuestion(
+    updateCourseQuestionDto: UpdateCourseQuestionDto,
+    questionId: string,
+  ) {
+    try {
+      const { question, options, answer, point } = updateCourseQuestionDto;
+
+      // Check if course exists
+      const course = await this.courseRepository.findOne({
+        id: Number(questionId),
+      });
+
+      if (!course) {
+        throw new HttpException(
+          "Course does not exist",
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // Update the question
+      const updatedQuestion = await this.courseQuestionRepository.update(
+        { id: Number(questionId) },
+        {
+          question,
+          options,
+          answer,
+          point,
+        },
+      );
+      return successResponse(updatedQuestion, "Question updated successfully");
     } catch (error) {
       throw error;
     }
