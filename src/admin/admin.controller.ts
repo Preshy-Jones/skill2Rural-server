@@ -12,6 +12,7 @@ import {
   HttpStatus,
   Patch,
   UploadedFile,
+  Query,
 } from "@nestjs/common";
 import { AdminService } from "./admin.service";
 import {
@@ -115,8 +116,11 @@ export class AdminController {
   @ApiOperation({ summary: "Get All Users" })
   @Get("users")
   @ApiBearerAuth()
-  async getAllUsers() {
-    return this.adminService.getAllUsers();
+  async getAllUsers(
+    @Query("page") page: number = 1,
+    @Query("pageSize") pageSize: number = 10,
+  ) {
+    return this.adminService.getAllUsers(page, pageSize);
   }
 
   // Get users stats
@@ -172,8 +176,11 @@ export class AdminController {
   @ApiOperation({ summary: "Get Admin Users" })
   @Get("admins")
   @ApiBearerAuth()
-  async getAdmin() {
-    return this.adminService.getAdmins();
+  async getAdmin(
+    @Query("page") page: number = 1,
+    @Query("pageSize") pageSize: number = 10,
+  ) {
+    return this.adminService.getAdmins(page, pageSize);
   }
 
   // Get an admin user
@@ -246,8 +253,11 @@ export class AdminCourseController {
   @ApiOperation({ summary: "Get All Courses" })
   @Get()
   @ApiBearerAuth()
-  async getAllCourses() {
-    return this.adminService.getAllCourses();
+  async getAllCourses(
+    @Query("page") page: number = 1,
+    @Query("pageSize") pageSize: number = 10,
+  ) {
+    return this.adminService.getAllCourses(page, pageSize);
   }
 
   // Get course
@@ -310,17 +320,17 @@ export class AdminCourseController {
   )
   async createCourse(
     @Body() createCourseDto: CreateCourseDto,
-
+    @Request() req,
     @UploadedFiles()
     files: {
       course_video?: Express.Multer.File[];
       thumbnail_image?: Express.Multer.File[];
     },
   ) {
-    return this.adminService.createCourse(createCourseDto, files);
+    return this.adminService.createCourse(createCourseDto, files, req.user.id);
   }
 
-  @Patch("")
+  @Patch(":courseId")
   @UseInterceptors(FileInterceptor("thumbnail_image", multerOptions))
   @ApiOperation({
     summary: "Update Course",
@@ -342,10 +352,29 @@ export class AdminCourseController {
     @UploadedFile()
     thumbnail_image: Express.Multer.File,
   ) {
+    // return {
+    //   updateCourseDto,
+    //   thumbnail_image,
+    //   courseId,
+    // };
     return this.adminService.updateCourse(
       updateCourseDto,
       thumbnail_image,
       courseId,
     );
+  }
+
+  //delete course
+  @ApiOperation({
+    summary: "Delete Course",
+  })
+  @ApiResponse({
+    status: 200,
+    description: "Course deleted successfully",
+  })
+  @ApiBearerAuth()
+  @Patch("delete/:courseId")
+  async deleteCourse(@Param("courseId") courseId: string) {
+    return this.adminService.deleteCourse(courseId);
   }
 }

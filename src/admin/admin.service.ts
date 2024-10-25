@@ -10,7 +10,7 @@ import { CourseProgressRepository } from "src/course-progress/repositories/cours
 import { UserType } from "src/user/dto/create-educator.dto";
 import { subMonths } from "date-fns";
 import { QuizRepository } from "src/question/repositories/quiz.repository.dto";
-import { CourseStatus, Period } from "src/common/global/interface";
+import { Period } from "src/common/global/interface";
 import { PrismaService } from "src/prisma.service";
 import { JwtService } from "@nestjs/jwt";
 import { CreateCourseDto } from "./dto/create-course.dto";
@@ -30,6 +30,7 @@ import { ChangePasswordDto } from "src/user/dto/changePassword.dto";
 import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
 import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
+import { CourseStatus } from "@prisma/client";
 // import { getVideoDurationInSeconds } from "get-video-duration";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -290,8 +291,27 @@ export class AdminService {
     };
   }
 
-  async getAllUsers() {
-    return this.userRepository.findAll();
+  async getAllUsers(page: number, pageSize: number) {
+    try {
+      const skip = (page - 1) * pageSize;
+      const take = pageSize;
+
+      const [users, totalCount] = await Promise.all([
+        this.userRepository.users({}, skip, take),
+        this.userRepository.count(),
+      ]);
+
+      const result = {
+        users,
+        totalCount,
+        totalPages: Math.ceil(totalCount / pageSize),
+        currentPage: page,
+      };
+
+      return successResponse(result, "Users retrieved successfully");
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getUsersStats() {
@@ -632,26 +652,50 @@ export class AdminService {
     }));
   }
 
-  async getAllCourses() {
-    // get all courses, also get the count of number of course progress that exceeds 90% which is the completion rate
-    const courses = await this.courseRepository.courses(
-      {},
-      {
-        _count: {
-          select: {
-            progress: {
-              where: {
-                progressPercentage: {
-                  gte: 90,
+  async getAllCourses(page: number, pageSize: number) {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    const [courses, totalCount] = await Promise.all([
+      // get all courses, also get the count of number of course progress that exceeds 90% which is the completion rate
+      this.courseRepository.courses(
+        {
+          //course status not deleted
+          status: {
+            not: CourseStatus.DELETED,
+          },
+        },
+        {
+          _count: {
+            select: {
+              progress: {
+                where: {
+                  progressPercentage: {
+                    gte: 90,
+                  },
                 },
               },
             },
           },
         },
-      },
-    );
+        skip,
+        take,
+      ),
+      this.courseRepository.countCourses({
+        status: {
+          not: CourseStatus.DELETED,
+        },
+      }),
+    ]);
 
-    return courses;
+    const result = {
+      courses,
+      totalCount,
+      totalPages: Math.ceil(totalCount / pageSize),
+      currentPage: page,
+    };
+
+    return successResponse(result, "Courses retrieved successfully");
   }
 
   async getCourse(courseId: string) {
@@ -664,7 +708,7 @@ export class AdminService {
         throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
       }
 
-      return course;
+      return successResponse(course, "Course retrieved successfully");
     } catch (error) {
       throw error;
     }
@@ -716,6 +760,7 @@ export class AdminService {
       course_video?: Express.Multer.File[];
       thumbnail_image?: Express.Multer.File[];
     },
+    adminUserId: number,
   ) {
     try {
       const { title, description } = createCourseDto;
@@ -753,6 +798,11 @@ export class AdminService {
         thumbnail_image: uploadedThumbnail.fileUrl,
         video_url: uploadedCourseVideo.fileUrl,
         duration,
+        publishedBy: {
+          connect: {
+            id: adminUserId,
+          },
+        },
       });
       return successResponse(newCourse, "Course created successfully");
     } catch (error) {
@@ -800,10 +850,23 @@ export class AdminService {
     }
   }
 
-  async getAdmins() {
+  async getAdmins(page: number, pageSize: number) {
     try {
-      const admins = await this.adminRepository.findAll();
-      return admins;
+      const skip = (page - 1) * pageSize;
+      const take = pageSize;
+
+      const [admins, totalCount] = await Promise.all([
+        this.adminRepository.admins({}, skip, take),
+        this.adminRepository.count({}),
+      ]);
+
+      const result = {
+        admins,
+        totalCount,
+        totalPages: Math.ceil(totalCount / pageSize),
+        currentPage: page,
+      };
+      return successResponse(result, "Admins retrieved successfully");
     } catch (error) {
       throw error;
     }
@@ -812,7 +875,7 @@ export class AdminService {
   async getAdmin(id: string) {
     try {
       const admin = await this.adminRepository.findOne({ id: Number(id) });
-      return admin;
+      return successResponse(admin, "Admin retrieved successfully");
     } catch (error) {
       throw error;
     }
@@ -887,6 +950,28 @@ export class AdminService {
       });
 
       return successResponse({}, "Password changed successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteCourse(courseId: string) {
+    try {
+      const course = await this.courseRepository.findOne({
+        id: Number(courseId),
+      });
+
+      if (!course) {
+        throw new HttpException("Course not found", HttpStatus.NOT_FOUND);
+      }
+
+      //update course status to deleted
+      await this.courseRepository.update({
+        where: { id: Number(courseId) },
+        data: { status: CourseStatus.DELETED },
+      });
+
+      return successResponse(null, "Course deleted successfully");
     } catch (error) {
       throw error;
     }

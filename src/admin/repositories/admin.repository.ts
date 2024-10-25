@@ -6,6 +6,14 @@ import { PrismaService } from "src/prisma.service";
 export class AdminRepository {
   constructor(private prisma: PrismaService) {}
 
+  async admins(where: Prisma.AdminWhereInput, skip?: number, take?: number) {
+    return this.prisma.admin.findMany({
+      where,
+      ...(skip && { skip }),
+      ...(take && { take }),
+    });
+  }
+
   async findOneByEmail(email: string) {
     return this.prisma.admin.findUnique({
       where: {
@@ -37,5 +45,9 @@ export class AdminRepository {
 
   async findAll() {
     return this.prisma.admin.findMany();
+  }
+
+  async count(where: Prisma.AdminWhereInput) {
+    return this.prisma.admin.count({ where });
   }
 }

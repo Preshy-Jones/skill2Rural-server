@@ -60,6 +60,8 @@ model Course {
   Quiz        Quiz[]
   Certificate Certificate[]
   status      CourseStatus     @default(INACTIVE)
+  publishedBy Admin?           @relation(fields: [publishedById], references: [id])
+  publishedById Int?
 }
 
 model CourseProgress {
@@ -141,6 +143,7 @@ model Admin {
   password                          String?
   status                           AdminStatus      @default(ACTIVE)
   profile_photo                     String?
+  Course Course[]
 }
 
 enum AdminStatus {
@@ -155,4 +158,5 @@ enum CourseStatus {
   ACTIVE
   ARCHIVED
   INACTIVE
+  DELETED
 }

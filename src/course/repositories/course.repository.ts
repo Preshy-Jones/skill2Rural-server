@@ -25,10 +25,14 @@ export class CourseRepository {
   async courses(
     where: Prisma.CourseWhereInput,
     include?: Prisma.CourseInclude,
+    skip?: number,
+    take?: number,
   ) {
     return this.prisma.course.findMany({
       where,
       ...(include && { include }),
+      ...(skip && { skip }),
+      ...(take && { take }),
     });
   }
 
