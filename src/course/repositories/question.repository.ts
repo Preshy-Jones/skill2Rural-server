@@ -45,4 +45,14 @@ export class CourseQuestionRepository {
       data,
     });
   }
+
+  async findUnique(
+    where: Prisma.CourseQuestionWhereUniqueInput,
+    include?: Prisma.CourseQuestionInclude,
+  ) {
+    return this.prisma.courseQuestion.findUnique({
+      where,
+      ...(include && { include }),
+    });
+  }
 }

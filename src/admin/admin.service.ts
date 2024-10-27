@@ -202,7 +202,7 @@ export class AdminService {
       const { question, options, answer, point } = updateCourseQuestionDto;
 
       // Check if question exists
-      const courseQuestion = await this.courseQuestionRepository.findOne({
+      const courseQuestion = await this.courseQuestionRepository.findUnique({
         id: Number(questionId),
       });
 
