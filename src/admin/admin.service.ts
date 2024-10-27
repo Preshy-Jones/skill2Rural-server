@@ -201,14 +201,14 @@ export class AdminService {
     try {
       const { question, options, answer, point } = updateCourseQuestionDto;
 
-      // Check if course exists
-      const course = await this.courseRepository.findOne({
+      // Check if question exists
+      const courseQuestion = await this.courseQuestionRepository.findOne({
         id: Number(questionId),
       });
 
-      if (!course) {
+      if (!courseQuestion) {
         throw new HttpException(
-          "Course does not exist",
+          "course Question does not exist",
           HttpStatus.BAD_REQUEST,
         );
       }
