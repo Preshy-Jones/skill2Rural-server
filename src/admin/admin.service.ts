@@ -29,7 +29,7 @@ import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
 import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
-import { CourseStatus } from "@prisma/client";
+import { CourseStatus, User } from "@prisma/client";
 import { UpdateCourseQuestionDto } from "./dto/update-course-question.dto";
 // import { getVideoDurationInSeconds } from "get-video-duration";
 
@@ -392,6 +392,10 @@ export class AdminService {
       ).toFixed(2),
     );
 
+    // get total students reached by educators
+    const totalReached =
+      await this.userRepository.sumNoOfStudentsReachedByEducators();
+
     // get total student users
     const totalStudents = await this.userRepository.count({
       type: UserType.Student,
@@ -421,6 +425,7 @@ export class AdminService {
       totalEducators: {
         value: totalEducators,
         percentageIncreaseInTotalEducators,
+        totalReached,
       },
       totalStudents: {
         value: totalStudents,

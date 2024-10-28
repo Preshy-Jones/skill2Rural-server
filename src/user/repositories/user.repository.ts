@@ -79,4 +79,14 @@ export class UserRepository {
       ...(orderBy && { orderBy }),
     });
   }
+
+  async sumNoOfStudentsReachedByEducators() {
+    const sum = this.prisma.user.aggregate({
+      _sum: {
+        no_of_students_to_reach: true,
+      },
+    });
+
+    return (await sum)._sum.no_of_students_to_reach;
+  }
 }
