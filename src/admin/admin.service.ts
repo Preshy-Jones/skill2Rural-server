@@ -758,7 +758,7 @@ export class AdminService {
     }));
   }
 
-  async getAllCourses(page: number, pageSize: number) {
+  async getAllCourses(page: number, pageSize: number, search?: string) {
     const skip = (page - 1) * pageSize;
     const take = pageSize;
 
@@ -786,12 +786,16 @@ export class AdminService {
         },
         skip,
         take,
+        search,
       ),
-      this.courseRepository.countCourses({
-        status: {
-          not: CourseStatus.DELETED,
+      this.courseRepository.countCourses(
+        {
+          status: {
+            not: CourseStatus.DELETED,
+          },
         },
-      }),
+        search,
+      ),
     ]);
 
     const result = {

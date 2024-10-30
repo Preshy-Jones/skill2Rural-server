@@ -294,11 +294,33 @@ export class AdminCourseController {
   @ApiOperation({ summary: "Get All Courses" })
   @Get()
   @ApiBearerAuth()
+  //Get all users
+  @ApiOperation({ summary: "Get All Users" })
+  @Get("users")
+  @ApiQuery({
+    name: "page",
+    required: true,
+    type: Number,
+    description: "Page number",
+  })
+  @ApiQuery({
+    name: "pageSize",
+    required: true,
+    type: Number,
+    description: "Number of items per page",
+  })
+  @ApiQuery({
+    name: "search",
+    required: false,
+    type: String,
+    description: "Search term",
+  })
   async getAllCourses(
     @Query("page") page: number = 1,
     @Query("pageSize") pageSize: number = 10,
+    @Query("search") search: string,
   ) {
-    return this.adminService.getAllCourses(page, pageSize);
+    return this.adminService.getAllCourses(page, pageSize, search);
   }
 
   // Get course

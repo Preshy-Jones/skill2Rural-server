@@ -27,7 +27,17 @@ export class CourseRepository {
     include?: Prisma.CourseInclude,
     skip?: number,
     take?: number,
+    search?: string,
   ) {
+    if (search) {
+      where = {
+        ...where,
+        title: {
+          contains: search,
+          mode: "insensitive",
+        },
+      };
+    }
     return this.prisma.course.findMany({
       where,
       ...(include && { include }),
@@ -68,7 +78,16 @@ export class CourseRepository {
     });
   }
 
-  async countCourses(where?: Prisma.CourseWhereInput) {
+  async countCourses(where?: Prisma.CourseWhereInput, search?: string) {
+    if (search) {
+      where = {
+        ...where,
+        title: {
+          contains: search,
+          mode: "insensitive",
+        },
+      };
+    }
     return this.prisma.course.count({
       where,
     });
