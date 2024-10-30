@@ -29,7 +29,7 @@ import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
 import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
-import { CourseStatus, User } from "@prisma/client";
+import { CourseStatus, Type, User, UserStatus } from "@prisma/client";
 import { UpdateCourseQuestionDto } from "./dto/update-course-question.dto";
 import { profile } from "console";
 // import { getVideoDurationInSeconds } from "get-video-duration";
@@ -328,14 +328,51 @@ export class AdminService {
     };
   }
 
-  async getAllUsers(page: number, pageSize: number) {
+  async getAllUsers(
+    page: number,
+    pageSize: number,
+    search?: string,
+    status?: UserStatus,
+    userType?: Type,
+  ) {
     try {
       const skip = (page - 1) * pageSize;
       const take = pageSize;
 
+      const filter: {
+        status?: UserStatus;
+        userType?: Type;
+      } = {};
+      if (status) {
+        // Validate that status is a valid UserStatus
+        if (!Object.values(UserStatus).includes(status)) {
+          throw new HttpException(
+            `Invalid status: ${status}, valid values are ${Object.values(
+              UserStatus,
+            ).join(", ")}
+              `,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        filter.status = status;
+      }
+      if (userType) {
+        // Validate that userType is a valid Type
+        if (!Object.values(Type).includes(userType)) {
+          throw new HttpException(
+            `Invalid userType: ${userType}, valid values are ${Object.values(
+              Type,
+            ).join(", ")}
+              `,
+            HttpStatus.BAD_REQUEST,
+          );
+        }
+        filter.userType = userType;
+      }
+
       const [users, totalCount] = await Promise.all([
-        this.userRepository.users({}, skip, take),
-        this.userRepository.count(),
+        this.userRepository.users({ ...filter }, skip, take, search),
+        this.userRepository.count({}, search),
       ]);
 
       const result = {
@@ -486,6 +523,33 @@ export class AdminService {
       totalCourseCompletedbyUser,
       percentageCompleted,
     };
+  }
+
+  async deactivateUser(userId: string) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: {
+          id: Number(userId),
+        },
+      });
+
+      if (!user) {
+        throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+      }
+
+      //deactivate user
+      const updatedUser = await this.userRepository.update({
+        where: {
+          id: Number(userId),
+        },
+        data: {
+          status: UserStatus.DEACTIVATED,
+        },
+      });
+      return successResponse(updatedUser, "User updated successfully");
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getUserCourses(id: string) {

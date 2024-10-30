@@ -24,6 +24,7 @@ model User {
   CourseReview                      CourseReview[]
   Quiz                              Quiz[]
   Certificate                       Certificate[]
+  status                            UserStatus       @default(ACTIVE)
 }
 
 model Educator {
@@ -158,5 +159,13 @@ enum CourseStatus {
   ACTIVE
   ARCHIVED
   INACTIVE
+  DELETED
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  DEACTIVATED
   DELETED
 }

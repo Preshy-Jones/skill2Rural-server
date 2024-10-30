@@ -6,7 +6,21 @@ import { PrismaService } from "src/prisma.service";
 export class UserRepository {
   constructor(private prisma: PrismaService) {}
 
-  async users(where: Prisma.UserWhereInput, skip?: number, take?: number) {
+  async users(
+    where: Prisma.UserWhereInput,
+    skip?: number,
+    take?: number,
+    search?: string,
+  ) {
+    if (search) {
+      where = {
+        ...where,
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      };
+    }
     return this.prisma.user.findMany({
       where,
       ...(skip && { skip }),
@@ -59,7 +73,16 @@ export class UserRepository {
     return this.prisma.user.findMany();
   }
 
-  async count(where?: Prisma.UserWhereInput) {
+  async count(where?: Prisma.UserWhereInput, search?: string) {
+    if (search) {
+      where = {
+        ...where,
+        name: {
+          contains: search,
+          mode: "insensitive",
+        },
+      };
+    }
     return this.prisma.user.count({ where });
   }
 

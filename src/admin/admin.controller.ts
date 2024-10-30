@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
@@ -40,6 +41,7 @@ import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
 import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
+import { Type, UserStatus } from "@prisma/client";
 const storage = multer.memoryStorage();
 
 export const multerOptions = {
@@ -115,12 +117,51 @@ export class AdminController {
   //Get all users
   @ApiOperation({ summary: "Get All Users" })
   @Get("users")
+  @ApiQuery({
+    name: "page",
+    required: true,
+    type: Number,
+    description: "Page number",
+  })
+  @ApiQuery({
+    name: "pageSize",
+    required: true,
+    type: Number,
+    description: "Number of items per page",
+  })
+  @ApiQuery({
+    name: "search",
+    required: false,
+    type: String,
+    description: "Search term",
+  })
+  @ApiQuery({
+    name: "status",
+    required: false,
+    type: String,
+    description: "Filter by Status",
+  })
+  @ApiQuery({
+    name: "userType",
+    required: false,
+    type: String,
+    description: "Filter by User Type",
+  })
   @ApiBearerAuth()
   async getAllUsers(
     @Query("page") page: number = 1,
     @Query("pageSize") pageSize: number = 10,
+    @Query("search") search: string,
+    @Query("status") status: UserStatus,
+    @Query("userType") userType: Type,
   ) {
-    return this.adminService.getAllUsers(page, pageSize);
+    return this.adminService.getAllUsers(
+      page,
+      pageSize,
+      search,
+      status,
+      userType,
+    );
   }
 
   // Get users stats
