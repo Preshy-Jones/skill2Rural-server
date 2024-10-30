@@ -149,7 +149,7 @@ export class AdminController {
 
   // Update admin user
   @Patch("")
-  @UseInterceptors(FileInterceptor("file", multerOptions))
+  @UseInterceptors(FileInterceptor("profile_photo", multerOptions))
   @ApiOperation({
     summary: "Update user",
   })
