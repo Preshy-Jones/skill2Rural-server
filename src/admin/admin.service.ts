@@ -31,6 +31,7 @@ import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
 import { CourseStatus, User } from "@prisma/client";
 import { UpdateCourseQuestionDto } from "./dto/update-course-question.dto";
+import { profile } from "console";
 // import { getVideoDurationInSeconds } from "get-video-duration";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -100,6 +101,7 @@ export class AdminService {
         id: admin.id,
         email: admin.email,
         name: admin.name,
+        profile_photo: admin.profile_photo,
       };
     } catch (error) {
       throw error;
