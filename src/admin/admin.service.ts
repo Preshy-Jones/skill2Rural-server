@@ -29,9 +29,16 @@ import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
 import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
-import { CourseStatus, Type, User, UserStatus } from "@prisma/client";
+import {
+  CourseStatus,
+  CourseType,
+  Type,
+  User,
+  UserStatus,
+} from "@prisma/client";
 import { UpdateCourseQuestionDto } from "./dto/update-course-question.dto";
 import { profile } from "console";
+import { SendMessageToAllUsersDto } from "./dto/send-message-to-all-users.dto";
 // import { getVideoDurationInSeconds } from "get-video-duration";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -757,19 +764,58 @@ export class AdminService {
       certificateCount: count,
     }));
   }
-
-  async getAllCourses(page: number, pageSize: number, search?: string) {
+  async getAllCourses(
+    page: number,
+    pageSize: number,
+    search?: string,
+    status?: CourseStatus,
+    type?: CourseType,
+  ) {
     const skip = (page - 1) * pageSize;
     const take = pageSize;
+
+    const filter: {
+      status?: CourseStatus;
+      type?: CourseType;
+    } = {};
+
+    if (status) {
+      // Validate that status is a valid CourseStatus
+      if (!Object.values(CourseStatus).includes(status)) {
+        throw new HttpException(
+          `Invalid status: ${status}, valid values are ${Object.values(
+            CourseStatus,
+          ).join(", ")}
+            `,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      filter.status = status;
+    }
+
+    if (type) {
+      // Validate that type is a valid CourseType
+      if (!Object.values(CourseType).includes(type)) {
+        throw new HttpException(
+          `Invalid type: ${type}, valid values are ${Object.values(
+            CourseType,
+          ).join(", ")}
+            `,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      filter.type = type;
+    }
 
     const [courses, totalCount] = await Promise.all([
       // get all courses, also get the count of number of course progress that exceeds 90% which is the completion rate
       this.courseRepository.courses(
         {
-          //course status not deleted
-          status: {
-            not: CourseStatus.DELETED,
-          },
+          // //course status not deleted
+          // status: {
+          //   not: CourseStatus.DELETED,
+          // },
+          ...filter,
         },
         {
           _count: {
@@ -793,6 +839,7 @@ export class AdminService {
           status: {
             not: CourseStatus.DELETED,
           },
+          ...filter,
         },
         search,
       ),
@@ -1082,6 +1129,30 @@ export class AdminService {
       });
 
       return successResponse(null, "Course deleted successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async sendMessageToAllUsers(
+    sendMessageToAllUsersDto: SendMessageToAllUsersDto,
+  ) {
+    try {
+      const { message } = sendMessageToAllUsersDto;
+      //get all users
+      const users = await this.userRepository.findAll();
+
+      //send message to all users
+      users.forEach(async (user) => {
+        await this.mailService.sendMailNodeMailer({
+          to: user.email,
+          subject: "Message from Admin",
+          text: message,
+          html: `<p>${message}</p>`,
+        });
+      });
+
+      return successResponse(null, "Message sent successfully");
     } catch (error) {
       throw error;
     }

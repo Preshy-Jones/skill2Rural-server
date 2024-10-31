@@ -45,6 +45,11 @@ enum Type {
   EDUCATOR
 }
 
+enum CourseType {
+  FREE
+  PAID
+}
+
 model Course {
   id          Int              @id @default(autoincrement())
   title       String
@@ -63,6 +68,7 @@ model Course {
   status      CourseStatus     @default(INACTIVE)
   publishedBy Admin?           @relation(fields: [publishedById], references: [id])
   publishedById Int?
+  type        CourseType       @default(FREE)
 }
 
 model CourseProgress {

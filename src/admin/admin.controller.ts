@@ -41,7 +41,8 @@ import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AdminChangePasswordDto } from "./dto/admin-change-password.dto";
 import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
-import { Type, UserStatus } from "@prisma/client";
+import { CourseStatus, CourseType, Type, UserStatus } from "@prisma/client";
+import { SendMessageToAllUsersDto } from "./dto/send-message-to-all-users.dto";
 const storage = multer.memoryStorage();
 
 export const multerOptions = {
@@ -240,6 +241,16 @@ export class AdminController {
     return this.adminService.inviteAdmin(inviteAdminDto);
   }
 
+  // send message to all users
+  @ApiOperation({ summary: "Send Message to All Users" })
+  @Post("send-message")
+  @ApiBearerAuth()
+  async sendMessage(
+    @Body() sendMessageToAllUsersDto: SendMessageToAllUsersDto,
+  ) {
+    return this.adminService.sendMessageToAllUsers(sendMessageToAllUsersDto);
+  }
+
   // // change password
   @Patch("change-password")
   @ApiOperation({
@@ -319,8 +330,16 @@ export class AdminCourseController {
     @Query("page") page: number = 1,
     @Query("pageSize") pageSize: number = 10,
     @Query("search") search: string,
+    @Query("status") status: CourseStatus,
+    @Query("type") type: CourseType,
   ) {
-    return this.adminService.getAllCourses(page, pageSize, search);
+    return this.adminService.getAllCourses(
+      page,
+      pageSize,
+      search,
+      status,
+      type,
+    );
   }
 
   // Get course
