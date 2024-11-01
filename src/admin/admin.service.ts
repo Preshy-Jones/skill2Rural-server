@@ -348,7 +348,7 @@ export class AdminService {
 
       const filter: {
         status?: UserStatus;
-        userType?: Type;
+        type?: Type;
       } = {};
       if (status) {
         // Validate that status is a valid UserStatus
@@ -374,9 +374,10 @@ export class AdminService {
             HttpStatus.BAD_REQUEST,
           );
         }
-        filter.userType = userType;
+        filter.type = userType;
       }
 
+      // return filter;
       const [users, totalCount] = await Promise.all([
         this.userRepository.users({ ...filter }, skip, take, search),
         this.userRepository.count({}, search),
