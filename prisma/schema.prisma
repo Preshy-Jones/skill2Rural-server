@@ -151,6 +151,8 @@ model Admin {
   status                           AdminStatus      @default(ACTIVE)
   profile_photo                     String?
   Course Course[]
+  createdAt                         DateTime         @default(now())
+  updatedAt                         DateTime         @updatedAt
 }
 
 enum AdminStatus {
