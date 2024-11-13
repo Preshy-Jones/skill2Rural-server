@@ -39,6 +39,7 @@ import {
 import { UpdateCourseQuestionDto } from "./dto/update-course-question.dto";
 import { profile } from "console";
 import { SendMessageToAllUsersDto } from "./dto/send-message-to-all-users.dto";
+import { SendMessageToUserDto } from "./dto/send-message-to-user.dto";
 // import { getVideoDurationInSeconds } from "get-video-duration";
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -554,7 +555,7 @@ export class AdminService {
           status: UserStatus.DEACTIVATED,
         },
       });
-      return successResponse(updatedUser, "User updated successfully");
+      return successResponse(updatedUser, "User deactivated successfully");
     } catch (error) {
       throw error;
     }
@@ -1151,6 +1152,34 @@ export class AdminService {
           text: message,
           html: `<p>${message}</p>`,
         });
+      });
+
+      return successResponse(null, "Message sent successfully");
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async sendMessageToUser(sendMessageToUserDto: SendMessageToUserDto, userId) {
+    try {
+      const user = await this.userRepository.findOne({
+        where: {
+          id: Number(userId),
+        },
+      });
+
+      if (!user) {
+        throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+      }
+
+      const { message } = sendMessageToUserDto;
+
+      //send message to user
+      await this.mailService.sendMailNodeMailer({
+        to: user.email,
+        subject: "Message from Skill2rural Admin",
+        text: message,
+        html: `<p>${message}</p>`,
       });
 
       return successResponse(null, "Message sent successfully");

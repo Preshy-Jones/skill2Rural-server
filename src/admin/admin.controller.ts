@@ -43,6 +43,8 @@ import { UpdateAdminUserDto } from "./dto/update-admin.dto";
 import { CreateCourseQuestionsDto } from "./dto/create-course-questions.dto";
 import { CourseStatus, CourseType, Type, UserStatus } from "@prisma/client";
 import { SendMessageToAllUsersDto } from "./dto/send-message-to-all-users.dto";
+import { SendMessageToUserDto } from "./dto/send-message-to-user.dto";
+// import { CreateAdminDto } from "./dto/create-admin.dto";
 const storage = multer.memoryStorage();
 
 export const multerOptions = {
@@ -81,6 +83,24 @@ export const multerOptions = {
 @Controller("admin")
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
+
+  // //create admin user
+  // @ApiOperation({
+  //   summary: "Create Admin User",
+  // })
+  // @ApiResponse({
+  //   status: 201,
+  //   description: "Admin user created successfully",
+  // })
+  // @ApiBody({
+  //   type: CreateAdminDto,
+  // })
+  // @ApiBearerAuth()
+  // @Post("create-admin")
+  // @Public()
+  // async createAdmin(@Body() createAdminDto: CreateAdminDto) {
+  //   return this.adminService.create(createAdminDto);
+  // }
 
   //login
   @ApiOperation({ summary: "Login" })
@@ -249,6 +269,17 @@ export class AdminController {
     @Body() sendMessageToAllUsersDto: SendMessageToAllUsersDto,
   ) {
     return this.adminService.sendMessageToAllUsers(sendMessageToAllUsersDto);
+  }
+
+  // send message to a single user
+  @ApiOperation({ summary: "Send Message to a User" })
+  @Post("send-message/:userId")
+  @ApiBearerAuth()
+  async sendMessageToUser(
+    @Body() sendMessageToUserDto: SendMessageToUserDto,
+    @Param("userId") userId: string,
+  ) {
+    return this.adminService.sendMessageToUser(sendMessageToUserDto, userId);
   }
 
   // // change password
