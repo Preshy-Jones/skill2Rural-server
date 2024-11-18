@@ -40,8 +40,6 @@ export class UserService {
 
       const user = await this.userRepository.findOneByEmail(email);
 
-      console.log(user, "user");
-
       //check if user already exists
       if (user) {
         throw new HttpException(
@@ -69,7 +67,7 @@ export class UserService {
       const totalUsers = await this.userRepository.count();
 
       await this.mailService.sendMailResend({
-        to: this.configService.get("RECEIVING_MAIL"),
+        to: "skillrural@gmail.com",
         subject: "New user registration",
         text: `A new user with email ${createUserDto.email} has registered on the platform, total users on the platform is ${totalUsers}`,
         html: `<p>A new user with email ${createUserDto.email} has registered on the platform</p>, <p> Name: ${createUserDto.name}</p>, user type: ${userType}, <p> Total users on the platform is ${totalUsers}</p>`,
@@ -117,7 +115,7 @@ export class UserService {
           "profile_photos",
         );
 
-        updateUserDto.profile_photo = uploadedPhoto.imageUrl;
+        updateUserDto.profile_photo = uploadedPhoto.fileUrl;
       }
 
       return this.userRepository.update({

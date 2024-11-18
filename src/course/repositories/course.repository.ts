@@ -6,7 +6,7 @@ import { PrismaService } from "src/prisma.service";
 export class CourseRepository {
   constructor(private prisma: PrismaService) {}
 
-  async create(data) {
+  async create(data: Prisma.CourseCreateInput) {
     return this.prisma.course.create({
       data,
     });
@@ -25,10 +25,24 @@ export class CourseRepository {
   async courses(
     where: Prisma.CourseWhereInput,
     include?: Prisma.CourseInclude,
+    skip?: number,
+    take?: number,
+    search?: string,
   ) {
+    if (search) {
+      where = {
+        ...where,
+        title: {
+          contains: search,
+          mode: "insensitive",
+        },
+      };
+    }
     return this.prisma.course.findMany({
       where,
       ...(include && { include }),
+      ...(skip && { skip }),
+      ...(take && { take }),
     });
   }
 
@@ -64,9 +78,35 @@ export class CourseRepository {
     });
   }
 
-  async countCourses(where?: Prisma.CourseWhereInput) {
+  async countCourses(where?: Prisma.CourseWhereInput, search?: string) {
+    if (search) {
+      where = {
+        ...where,
+        title: {
+          contains: search,
+          mode: "insensitive",
+        },
+      };
+    }
     return this.prisma.course.count({
       where,
+    });
+  }
+
+  async coursesGroupBy(
+    by: Prisma.CourseScalarFieldEnum,
+    where: Prisma.CourseWhereInput,
+    count?: Prisma.CourseCountAggregateInputType,
+    orderBy?: Prisma.CourseOrderByWithAggregationInput,
+  ) {
+    return this.prisma.course.groupBy({
+      by: [by],
+      orderBy: {
+        createdAt: "desc",
+      },
+      where,
+      ...(count && { _count: count }),
+      ...(orderBy && { orderBy }),
     });
   }
 }

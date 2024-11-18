@@ -10,35 +10,32 @@ import {
   IsOptional,
 } from "class-validator";
 
-export class CreateCourseQuestionDto {
+export class UpdateCourseQuestionDto {
   @ApiProperty({
     description: "The question",
     example: "What is TypeScript?",
   })
-  @IsOptional()
   @IsNotEmpty()
   @IsString()
   question: string;
-  
-
   @ApiProperty({
-    description: "The answer (index of the correct option)", 
+    description: "The answer (index of the correct option)",
     example: 0,
   })
-  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   @Max(4)
   @Min(0)
+  @IsOptional()
   answer: number;
 
   @ApiProperty({
     description: "The point",
     example: 10,
   })
-  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
+  @IsOptional()
   point: number;
 
   @ApiProperty({
@@ -50,19 +47,10 @@ export class CreateCourseQuestionDto {
       "A library",
     ],
   })
-  @IsOptional()
   @IsNotEmpty()
   @IsString({ each: true })
   @ArrayNotEmpty()
   @ArrayMaxSize(5)
-  options: string[];
-
-  @ApiProperty({
-    description: "The course id",
-    example: 1,
-  })
   @IsOptional()
-  @IsNotEmpty()
-  @IsNumber()
-  courseId: number;
+  options: string[];
 }

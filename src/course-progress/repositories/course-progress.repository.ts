@@ -15,10 +15,11 @@ export class CourseProgressRepository {
   async courseProgress(
     where: Prisma.CourseProgressWhereInput,
     includes?: Prisma.CourseProgressInclude,
+    select?: Prisma.CourseProgressSelect,
   ) {
     return this.prisma.courseProgress.findMany({
       where,
-      ...(includes && { include: includes }),
+      ...(includes ? { include: includes } : select ? { select } : {}),
     });
   }
 
@@ -114,5 +115,11 @@ export class CourseProgressRepository {
       studentCompletionRate: studentCompletionRate.toFixed(2) + "%",
       educatorCompletionRate: educatorCompletionRate.toFixed(2) + "%",
     };
+  }
+
+  async countCourseProgress(where?: Prisma.CourseProgressWhereInput) {
+    return this.prisma.courseProgress.count({
+      where,
+    });
   }
 }

@@ -35,4 +35,18 @@ export class CertificateRepository {
       where,
     });
   }
+
+  async groupByCertificate(
+    by: Prisma.CertificateScalarFieldEnum,
+    where: Prisma.CertificateWhereInput,
+    count?: Prisma.CertificateCountAggregateInputType,
+    orderBy?: Prisma.CertificateOrderByWithAggregationInput,
+  ) {
+    return this.prisma.certificate.groupBy({
+      by: [by],
+      where,
+      ...(count && { _count: count }),
+      ...(orderBy && { orderBy }),
+    });
+  }
 }

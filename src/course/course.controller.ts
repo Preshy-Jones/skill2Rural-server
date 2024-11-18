@@ -16,7 +16,6 @@ import {
   ApiTags,
 } from "@nestjs/swagger";
 import { CourseService } from "./course.service";
-import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
 import { AddCourseReviewDto } from "./dto/add-course-review.dto";
 import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
@@ -27,24 +26,6 @@ import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 @Controller("course")
 export class CourseController {
   constructor(private readonly courseService: CourseService) {}
-
-  @Post()
-  @ApiOperation({
-    summary: "Create new course",
-  })
-  @ApiResponse({
-    status: 201,
-    description: "The record has been successfully created.",
-  })
-  @ApiBody({
-    type: CreateCourseDto,
-    description: "Json structure for course object",
-  })
-  @ApiBearerAuth()
-  @ApiResponse({ status: 403, description: "Forbidden" })
-  create(@Body() createCourseDto: CreateCourseDto) {
-    return this.courseService.create(createCourseDto);
-  }
 
   @Public()
   @ApiOperation({
@@ -110,11 +91,6 @@ export class CourseController {
     @Body() updateCourseDto: UpdateCourseDto,
   ) {
     return this.courseService.update(+id, updateCourseDto);
-  }
-
-  @Delete(":id")
-  removeCourse(@Param("id") id: string) {
-    return this.courseService.remove(+id);
   }
 
   @Get("reviews/:courseId")

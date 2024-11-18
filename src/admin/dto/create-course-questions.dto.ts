@@ -7,25 +7,24 @@ import {
   Min,
   ArrayNotEmpty,
   ArrayMaxSize,
-  IsOptional,
+  IsArray,
+  ValidateNested,
 } from "class-validator";
+import { Type } from "class-transformer";
 
-export class CreateCourseQuestionDto {
+class QuestionDto {
   @ApiProperty({
     description: "The question",
     example: "What is TypeScript?",
   })
-  @IsOptional()
   @IsNotEmpty()
   @IsString()
   question: string;
-  
 
   @ApiProperty({
-    description: "The answer (index of the correct option)", 
+    description: "The answer (index of the correct option)",
     example: 0,
   })
-  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   @Max(4)
@@ -36,7 +35,6 @@ export class CreateCourseQuestionDto {
     description: "The point",
     example: 10,
   })
-  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   point: number;
@@ -50,19 +48,29 @@ export class CreateCourseQuestionDto {
       "A library",
     ],
   })
-  @IsOptional()
   @IsNotEmpty()
   @IsString({ each: true })
   @ArrayNotEmpty()
   @ArrayMaxSize(5)
   options: string[];
+}
 
+export class CreateCourseQuestionsDto {
   @ApiProperty({
     description: "The course id",
     example: 1,
   })
-  @IsOptional()
   @IsNotEmpty()
   @IsNumber()
   courseId: number;
+
+  @ApiProperty({
+    description: "Array of questions",
+    type: [QuestionDto],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuestionDto)
+  @ArrayNotEmpty()
+  questions: QuestionDto[];
 }

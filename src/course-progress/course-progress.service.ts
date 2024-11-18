@@ -3,6 +3,7 @@ import { UpdateCourseProgressDto } from "./dto/update-course-progress.dto";
 import { CourseProgressRepository } from "./repositories/course-progress.repository";
 import { CourseService } from "src/course/course.service";
 import { successResponse } from "src/common/utils";
+import { Prisma } from "@prisma/client";
 
 @Injectable()
 export class CourseProgressService {
@@ -45,7 +46,7 @@ export class CourseProgressService {
       }
 
       if (!courseProgress) {
-        return this.courseProgressRepository.create({
+        await this.courseProgressRepository.create({
           lastWatchedTime,
           progressPercentage,
           user: {
@@ -59,17 +60,27 @@ export class CourseProgressService {
             },
           },
         });
-      }
 
+        return successResponse(
+          { lastWatchedTime, progressPercentage },
+          "Course progress updated successfully",
+        );
+      }
+      const completionPercentage = 90;
+      const updateCourseProgressPayload: Prisma.CourseProgressUpdateInput = {
+        lastWatchedTime,
+        progressPercentage,
+      };
+      if (Number(progressPercentage) >= completionPercentage) {
+        updateCourseProgressPayload.completedDateTime = new Date();
+      }
       await this.courseProgressRepository.updateCourseProgress(
-        {
-          lastWatchedTime,
-          progressPercentage,
-        },
+        updateCourseProgressPayload,
         {
           id: courseProgress.id,
         },
       );
+
       return successResponse(
         { lastWatchedTime, progressPercentage },
         "Course progress updated successfully",

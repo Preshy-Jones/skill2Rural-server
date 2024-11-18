@@ -14,7 +14,7 @@ export class CourseQuestionRepository {
     });
   }
 
-  async courseQuestion(
+  async courseQuestions(
     where: Prisma.CourseQuestionWhereInput,
     include?: Prisma.CourseQuestionInclude,
   ) {
@@ -26,5 +26,33 @@ export class CourseQuestionRepository {
 
   async findMany() {
     return this.prisma.courseQuestion.findMany();
+  }
+
+  async createMany(
+    data: Prisma.CourseQuestionCreateManyInput[],
+  ): Promise<Prisma.BatchPayload> {
+    return this.prisma.courseQuestion.createMany({
+      data,
+    });
+  }
+
+  async update(
+    where: Prisma.CourseQuestionWhereUniqueInput,
+    data: Prisma.CourseQuestionUpdateInput,
+  ): Promise<CourseQuestion> {
+    return this.prisma.courseQuestion.update({
+      where,
+      data,
+    });
+  }
+
+  async findUnique(
+    where: Prisma.CourseQuestionWhereUniqueInput,
+    include?: Prisma.CourseQuestionInclude,
+  ) {
+    return this.prisma.courseQuestion.findUnique({
+      where,
+      ...(include && { include }),
+    });
   }
 }

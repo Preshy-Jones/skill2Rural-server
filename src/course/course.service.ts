@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { CreateCourseDto } from "./dto/create-course.dto";
 import { UpdateCourseDto } from "./dto/update-course.dto";
 import { PrismaService } from "src/prisma.service";
 import { CourseRepository } from "./repositories/course.repository";
@@ -20,10 +19,6 @@ export class CourseService {
 
     private certificateRepository: CertificateRepository,
   ) {}
-
-  create(createCourseDto: CreateCourseDto) {
-    return this.courseRepository.create(createCourseDto);
-  }
 
   async findAll() {
     try {
