@@ -506,39 +506,39 @@ async function main() {
   //     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/1200px-Big_Buck_Bunny_thumbnail_vlc.png",
   // }
 
-  const coursesData = await Promise.all(
-    courses.map(async (course) => {
-      const courseData = await prisma.course.create({
-        data: {
-          title: course.title,
-          description: course.description,
-          objectives: course.objectives,
-          video_url: course.video_url,
-          duration: course.duration,
-          thumbnail_image: course.thumbnail_image,
-        },
-      });
-      const questionsData = await Promise.all(
-        course.questions.map(async (question) => {
-          const questionData = await prisma.courseQuestion.create({
-            data: {
-              question: question.question,
-              options: question.options,
-              answer: answerMapping[question.answer],
-              point: 5,
-              course: {
-                connect: {
-                  id: courseData.id,
-                },
-              },
-            },
-          });
-          return questionData;
-        }),
-      );
-      return courseData;
-    }),
-  );
+  // const coursesData = await Promise.all(
+  //   courses.map(async (course) => {
+  //     const courseData = await prisma.course.create({
+  //       data: {
+  //         title: course.title,
+  //         description: course.description,
+  //         objectives: course.objectives,
+  //         video_url: course.video_url,
+  //         duration: course.duration,
+  //         thumbnail_image: course.thumbnail_image,
+  //       },
+  //     });
+  //     const questionsData = await Promise.all(
+  //       course.questions.map(async (question) => {
+  //         const questionData = await prisma.courseQuestion.create({
+  //           data: {
+  //             question: question.question,
+  //             options: question.options,
+  //             answer: answerMapping[question.answer],
+  //             point: 5,
+  //             course: {
+  //               connect: {
+  //                 id: courseData.id,
+  //               },
+  //             },
+  //           },
+  //         });
+  //         return questionData;
+  //       }),
+  //     );
+  //     return courseData;
+  //   }),
+  // );
 }
 main()
   .then(async () => {
