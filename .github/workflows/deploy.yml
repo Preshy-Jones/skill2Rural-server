@@ -34,7 +34,7 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 22
           script: |
-            cd /path/to/your/app
+            cd /skill2Rural-server
             git pull origin main
             npm install
             npm run build
