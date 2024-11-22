@@ -1,14 +1,14 @@
-import { BeforeApplicationShutdown, Injectable, Logger } from '@nestjs/common';
+import { BeforeApplicationShutdown, Injectable, Logger } from "@nestjs/common";
 
 @Injectable()
 export class AppService implements BeforeApplicationShutdown {
   private logger = new Logger(AppService.name);
 
   beforeApplicationShutdown() {
-    this.logger.log('Gracefully Shutting down..');
+    this.logger.log("Gracefully Shutting down..");
   }
 
   getHello(): string {
-    return 'Hello World!';
+    return "Hello World!";
   }
 }

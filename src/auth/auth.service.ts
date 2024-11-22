@@ -14,7 +14,7 @@ export class AuthService {
   ) {}
   loginUser(loginUserDto: LoginUserDto) {
     return {
-      message: "Login successful",
+      message: "Logged in successfully",
       data: {
         user: loginUserDto,
         accessToken: this.jwtService.sign(
