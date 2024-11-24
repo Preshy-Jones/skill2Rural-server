@@ -104,6 +104,9 @@ export class CourseService {
               progressPercentage: "desc",
             },
             take: 1,
+            where: {
+              userId: userId,
+            },
           },
         },
       );

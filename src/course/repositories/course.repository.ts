@@ -38,6 +38,7 @@ export class CourseRepository {
         },
       };
     }
+   
     return this.prisma.course.findMany({
       where,
       ...(include && { include }),
