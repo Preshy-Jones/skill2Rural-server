@@ -1063,7 +1063,7 @@ export class AdminService {
     });
 
     //send email to admin
-    await this.mailService.sendMailNodeMailer({
+    await this.mailService.sendMailResend({
       to: newAdmin.email,
       subject: "Admin Invitation",
       text: `Hello ${newAdmin.name}, you have been invited to be an admin on our platform. Your password is ${password}`,

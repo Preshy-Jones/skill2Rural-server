@@ -7,7 +7,7 @@ import { CourseReviewRepository } from "./repositories/review.repositories";
 import { AddCourseReviewDto } from "./dto/add-course-review.dto";
 import { CourseQuestionRepository } from "./repositories/question.repository";
 import { CertificateRepository } from "./repositories/certificate.repository";
-import { Course } from "@prisma/client";
+import { Course, CourseStatus } from "@prisma/client";
 
 @Injectable()
 export class CourseService {
@@ -23,7 +23,10 @@ export class CourseService {
   async findAll() {
     try {
       const courses = await this.courseRepository.coursesSelect(
-        {},
+        {
+          // where status is equal to active
+          status: CourseStatus.ACTIVE,
+        },
         {
           id: true,
           title: true,
