@@ -15,6 +15,9 @@ import { UploadModule } from "./upload/upload.module";
 import { ConfigModule } from "@nestjs/config";
 import { AdminModule } from "./admin/admin.module";
 import { RolesGuard } from "./common/guards/roles.guard";
+import { OpenaiModule } from "./openai/openai.module";
+import { CareerModule } from "./career/career.module";
+import { WhatsappModule } from "./whatsapp/whatsapp.module";
 
 @Module({
   imports: [
@@ -26,6 +29,9 @@ import { RolesGuard } from "./common/guards/roles.guard";
     CourseProgressModule,
     QuestionModule,
     UploadModule,
+    OpenaiModule,
+    CareerModule,
+    WhatsappModule,
     ConfigModule.forRoot({
       // load: [configuration],
       isGlobal: true,
