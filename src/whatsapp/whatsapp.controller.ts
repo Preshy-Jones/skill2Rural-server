@@ -1,16 +1,16 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { WhatsappService } from './whatsapp.service';
-import { CareerService } from 'src/career/career.service';
-import { HandleMessageDto } from './dto/handle-message.dto';
+import { Body, Controller, Post } from "@nestjs/common";
+import { WhatsappService } from "./whatsapp.service";
+import { CareerService } from "src/career/career.service";
+import { HandleMessageDto } from "./dto/handle-message.dto";
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
-} from '@nestjs/swagger';
+} from "@nestjs/swagger";
 
-@ApiTags('Whatsapp')
-@Controller('whatsapp')
+@ApiTags("Whatsapp")
+@Controller("whatsapp")
 export class WhatsappController {
   constructor(
     private readonly whatsappService: WhatsappService,
@@ -18,13 +18,13 @@ export class WhatsappController {
   ) {}
 
   @ApiOperation({
-    summary: 'Handle incoming messages from WhatsApp',
+    summary: "Handle incoming messages from WhatsApp",
   })
-  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 403, description: "Forbidden" })
   @ApiBearerAuth()
-  @Post('webhook')
+  @Post("webhook")
   async handleMessage(@Body() handleMessageDto: HandleMessageDto) {
-    console.log('Received message:', handleMessageDto);
+    console.log("Received message:", handleMessageDto);
 
     const message = handleMessageDto.Body;
     const from = handleMessageDto.From;
