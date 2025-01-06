@@ -183,6 +183,7 @@ model Conversation {
  phoneNumber  String   @unique
  createdAt    DateTime @default(now())
  lastMessageAt DateTime @updatedAt
+ isActive     Boolean  @default(true)
  Message Message[]
 }
 

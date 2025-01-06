@@ -1,16 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { OpenAIService } from 'src/openai/openai.service';
-import { ConversationRepository } from './repositories/conversation.repository';
-import { ChatCompletionMessageParam } from 'openai/resources';
-import { PrismaService } from 'src/prisma.service';
-import { MessageRepository } from './repositories/message.repository';
+import { Injectable } from "@nestjs/common";
+import { OpenAIService } from "src/openai/openai.service";
+import { ConversationRepository } from "./repositories/conversation.repository";
+import { ChatCompletionMessageParam } from "openai/resources";
+import { PrismaService } from "src/prisma.service";
+import { MessageRepository } from "./repositories/message.repository";
 @Injectable()
 export class CareerService {
-  private conversationHistory: Map<
-    string,
-    Array<{ role: string; content: string }>
-  > = new Map();
-
+  private readonly SESSION_TIMEOUT = 24 * 60 * 60 * 1000;
   constructor(
     private openAIService: OpenAIService,
     private conversationRepository: ConversationRepository,
@@ -23,14 +19,22 @@ export class CareerService {
   }[] {
     return [
       {
-        role: 'system',
+        role: "system",
         content: `You are a career counselor bot. Ask about education, skills, interests, and experience. Provide specific career recommendations and relevant courses.`,
       },
     ];
   }
   async handleMessage(phoneNumber: string, messageContent: string) {
+    await this.cleanExpiredSessions(phoneNumber);
+
     let conversation = await this.prisma.conversation.findUnique({
-      where: { phoneNumber },
+      where: {
+        phoneNumber,
+        isActive: true,
+        lastMessageAt: {
+          gte: new Date(Date.now() - this.SESSION_TIMEOUT),
+        },
+      },
       include: { Message: true },
     });
 
@@ -46,7 +50,7 @@ export class CareerService {
           phoneNumber,
           Message: {
             create: {
-              role: 'system',
+              role: "system",
               content: `You are a career counselor bot. Ask about education, skills, interests, and experience. Provide specific career recommendations and relevant courses.`,
             },
           },
@@ -57,7 +61,7 @@ export class CareerService {
     // Add user message
     await this.prisma.message.create({
       data: {
-        role: 'user',
+        role: "user",
         content: messageContent,
         conversationId: conversation.id,
       },
@@ -66,11 +70,11 @@ export class CareerService {
     // Format messages for OpenAI
     const messages: ChatCompletionMessageParam[] = conversation.Message.map(
       (msg) => ({
-        role: msg.role as 'system' | 'user' | 'assistant',
+        role: msg.role as "system" | "user" | "assistant",
         content: msg.content,
       }),
     );
-    messages.push({ role: 'user', content: messageContent });
+    messages.push({ role: "user", content: messageContent });
 
     // Get AI response
     const response = await this.openAIService.generateResponse(messages);
@@ -78,7 +82,7 @@ export class CareerService {
     // Save AI response
     await this.prisma.message.create({
       data: {
-        role: 'assistant',
+        role: "assistant",
         content: response,
         conversationId: conversation.id,
       },
@@ -98,7 +102,7 @@ export class CareerService {
       where: { phoneNumber },
       include: {
         Message: {
-          orderBy: { createdAt: 'asc' },
+          orderBy: { createdAt: "asc" },
         },
       },
     });
@@ -107,6 +111,23 @@ export class CareerService {
   async deleteConversation(phoneNumber: string) {
     return this.prisma.conversation.delete({
       where: { phoneNumber },
+    });
+  }
+
+  private async cleanExpiredSessions(phoneNumber: string) {
+    const expiryDate = new Date(Date.now() - this.SESSION_TIMEOUT);
+
+    await this.prisma.conversation.updateMany({
+      where: {
+        isActive: true,
+        lastMessageAt: {
+          lt: expiryDate,
+        },
+        phoneNumber,
+      },
+      data: {
+        isActive: false,
+      },
     });
   }
 }

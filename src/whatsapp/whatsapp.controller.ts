@@ -8,9 +8,11 @@ import {
   ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
+import { Public } from "src/common/decorators/jwt-auth-guard.decorator";
 
 @ApiTags("Whatsapp")
 @Controller("whatsapp")
+@Public()
 export class WhatsappController {
   constructor(
     private readonly whatsappService: WhatsappService,
