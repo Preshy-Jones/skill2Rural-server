@@ -1,7 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { OpenAIService } from "src/openai/openai.service";
 import { ConversationRepository } from "./repositories/conversation.repository";
-import { ChatCompletionMessageParam } from "openai/resources";
+import {
+  ChatCompletionMessageParam,
+  ChatCompletionSystemMessageParam,
+  ChatCompletionUserMessageParam,
+} from "openai/resources";
 import { PrismaService } from "src/prisma.service";
 import { MessageRepository } from "./repositories/message.repository";
 
@@ -15,9 +19,9 @@ interface ConversationState {
     };
   };
 }
-
 @Injectable()
 export class CareerService {
+  private readonly logger = new Logger(CareerService.name);
   private readonly SESSION_TIMEOUT = 24 * 60 * 60 * 1000;
   private readonly CONVERSATION_STATES = {
     INITIAL: "initial",
@@ -95,35 +99,34 @@ export class CareerService {
   async handleMessage(phoneNumber: string, messageContent: string) {
     try {
       // Start a Prisma transaction to ensure data consistency
-      return await this.prisma.$transaction(async (prisma) => {
-        // Clean expired sessions
-        await this.cleanExpiredSessions(phoneNumber);
 
-        // Get or create conversation
-        let conversation = await this.getOrCreateConversation(phoneNumber);
+      // Clean expired sessions
+      await this.cleanExpiredSessions(phoneNumber);
 
-        // Determine current conversation state
-        const conversationState =
-          await this.determineConversationState(conversation);
+      // Get or create conversation
+      let conversation = await this.getOrCreateConversation(phoneNumber);
 
-        // Log incoming message
-        await this.logMessage(conversation.id, "user", messageContent);
+      // Determine current conversation state
+      const { state: conversationState } =
+        await this.determineConversationState(conversation);
 
-        // Process message based on state
-        const response = await this.processMessageByState(
-          conversation,
-          messageContent,
-          conversationState,
-        );
+      // Log incoming message
+      await this.logMessage(conversation.id, "user", messageContent);
 
-        // Log assistant response
-        await this.logMessage(conversation.id, "assistant", response);
+      // Process message based on state
+      const response = await this.processMessageByState(
+        conversation,
+        messageContent,
+        conversationState,
+      );
 
-        // Update conversation timestamp
-        await this.updateConversationTimestamp(conversation.id);
+      // Log assistant response
+      await this.logMessage(conversation.id, "assistant", response);
 
-        return response;
-      });
+      // Update conversation timestamp
+      await this.updateConversationTimestamp(conversation.id);
+
+      return response;
     } catch (error) {
       this.logger.error(
         `Error handling message: ${error.message}`,
@@ -146,79 +149,18 @@ export class CareerService {
       },
     });
   }
+  private async getConversationHistory(conversationId: number) {
+    return this.prisma.message.findMany({
+      where: { conversationId },
+      orderBy: { createdAt: "asc" },
+    });
+  }
 
   private async updateConversationTimestamp(conversationId: number) {
     await this.prisma.conversation.update({
       where: { id: conversationId },
       data: { lastMessageAt: new Date() },
     });
-  }
-
-  private async processMessageByState(
-    conversation: any,
-    messageContent: string,
-    conversationState: ConversationState,
-  ): Promise<string> {
-    const { currentState } = conversationState;
-
-    // Get all messages for context
-    const conversationHistory = await this.getConversationHistory(
-      conversation.id,
-    );
-
-    // Format messages for OpenAI
-    const messages: ChatCompletionMessageParam[] = [
-      // System message with current state context
-      {
-        role: "system",
-        content: this.getSystemPromptForState(
-          currentState,
-          conversationState.stateData,
-        ),
-      },
-      // Previous messages for context
-      ...this.formatMessagesForContext(conversationHistory),
-      // Current user message
-      {
-        role: "user",
-        content: messageContent,
-      },
-    ];
-
-    // Generate response using OpenAI
-    const response = await this.openAIService.generateResponse(messages);
-
-    // Check if we need to move to the next state
-    if (await this.shouldMoveToNextState(conversationState, messageContent)) {
-      const nextStatePrompt = await this.getNextStatePrompt(conversationState);
-      return `${response}\n\n${nextStatePrompt}`;
-    }
-
-    return response;
-  }
-
-  private getSystemPromptForState(
-    currentState: string,
-    stateData: any,
-  ): string {
-    const basePrompt = `You are Rafiki, a friendly career counselor bot. You are currently in the ${currentState} stage of the conversation.`;
-
-    const statePrompts = {
-      [this.CONVERSATION_STATES.INITIAL]:
-        `${basePrompt} Warmly welcome the user and introduce yourself.`,
-      [this.CONVERSATION_STATES.INTERESTS]:
-        `${basePrompt} Focus on understanding their interests and passions. Ask follow-up questions if their response isn't detailed enough.`,
-      [this.CONVERSATION_STATES.SKILLS]:
-        `${basePrompt} Explore their skills and talents. Reference their previously mentioned interests when relevant.`,
-      [this.CONVERSATION_STATES.CHALLENGES]:
-        `${basePrompt} Sensitively discuss their challenges and areas for growth. Be encouraging and supportive.`,
-      [this.CONVERSATION_STATES.ASPIRATIONS]:
-        `${basePrompt} Help them explore their future goals and dreams. Connect their aspirations to their interests and skills.`,
-      [this.CONVERSATION_STATES.RECOMMENDATIONS]:
-        `${basePrompt} Provide personalized career recommendations based on all previous responses.`,
-    };
-
-    return statePrompts[currentState] || basePrompt;
   }
 
   private async getOrCreateConversation(phoneNumber: string) {
@@ -251,9 +193,178 @@ export class CareerService {
     return conversation;
   }
 
+  private async processMessageByState(
+    conversation: any,
+    messageContent: string,
+    conversationState: ConversationState,
+  ): Promise<string> {
+    const { currentState } = conversationState;
+
+    // Get all messages for context
+    const conversationHistory = await this.getConversationHistory(
+      conversation.id,
+    );
+
+    // Format messages for OpenAI
+    const messages: ChatCompletionMessageParam[] = [
+      {
+        role: "system",
+        content: this.getSystemPromptForState(
+          currentState,
+          conversationState.stateData,
+        ),
+      },
+      ...this.formatMessagesForContext(conversationHistory),
+      {
+        role: "user",
+        content: messageContent,
+      },
+    ];
+
+    // Generate response using OpenAI
+    const response = await this.openAIService.generateResponse(messages);
+
+    console.log("response: ", response);
+
+    // Check if we need to move to next state
+    if (
+      await this.shouldMoveToNextState(
+        conversationState,
+        messageContent,
+        conversation.id,
+      )
+    ) {
+      const nextStatePrompt = await this.getNextStatePrompt(conversationState);
+      return `${response}\n\n${nextStatePrompt}`;
+    }
+
+    return response;
+  }
+
+  private getSystemPromptForState(
+    currentState: string,
+    stateData: any,
+  ): string {
+    const basePrompt = `You are Rafiki, a friendly career counselor bot. You are currently in the ${currentState} stage of the conversation.`;
+
+    const statePrompts = {
+      [this.CONVERSATION_STATES.INITIAL]:
+        `${basePrompt} Warmly welcome the user and introduce yourself.`,
+      [this.CONVERSATION_STATES.INTERESTS]:
+        `${basePrompt} Focus on understanding their interests and passions. Ask follow-up questions if their response isn't detailed enough.`,
+      [this.CONVERSATION_STATES.SKILLS]:
+        `${basePrompt} Explore their skills and talents. Reference their previously mentioned interests when relevant.`,
+      [this.CONVERSATION_STATES.CHALLENGES]:
+        `${basePrompt} Sensitively discuss their challenges and areas for growth. Be encouraging and supportive.`,
+      [this.CONVERSATION_STATES.ASPIRATIONS]:
+        `${basePrompt} Help them explore their future goals and dreams. Connect their aspirations to their interests and skills.`,
+      [this.CONVERSATION_STATES.RECOMMENDATIONS]:
+        `${basePrompt} Provide personalized career recommendations based on all previous responses.`,
+    };
+
+    return statePrompts[currentState] || basePrompt;
+  }
+
+  private formatMessagesForContext(
+    history: any[],
+  ): ChatCompletionMessageParam[] {
+    // Only include the last 10 messages for context to avoid token limits
+    return history.slice(-10).map((msg) => ({
+      role: msg.role as "system" | "user" | "assistant",
+      content: msg.content,
+    }));
+  }
+
+  private async shouldMoveToNextState(
+    conversationState: ConversationState,
+    messageContent: string,
+    conversationId: number,
+  ): Promise<boolean> {
+    const currentStateData =
+      conversationState.stateData[conversationState.currentState];
+
+    // If state is already complete, no need to check again
+
+    console.log("conversationState", conversationState);
+
+    console.log("completed reached shouldMoveToNextState", currentStateData);
+
+    if (currentStateData.completed) {
+      return true;
+    }
+
+    console.log("completed passed: shouldMoveToNextState out");
+
+    // Check if current message completes the state
+    const isComplete = await this.analyzeMessageCompleteness(
+      messageContent,
+      conversationState.currentState,
+    );
+
+    if (isComplete) {
+      console.log("completed reached: shouldMoveToNextState if isCompleted");
+
+      // Update state completion status
+      currentStateData.completed = true;
+      console.log("completed passed: shouldMoveToNextState if isCompleted");
+      await this.storeState(conversationId, conversationState);
+      return true;
+    }
+
+    return false;
+  }
+
+  private async analyzeMessageCompleteness(
+    message: string,
+    state: string,
+  ): Promise<boolean> {
+    const requirements = this.STATE_REQUIREMENTS[state];
+    if (!requirements) return true;
+
+    const messageContent = message.toLowerCase();
+
+    // Basic requirement checks
+    const hasRequiredKeywords = requirements.requiredKeywords.some((keyword) =>
+      messageContent.includes(keyword),
+    );
+    const meetsLengthRequirement =
+      messageContent.length >= requirements.minMessageLength;
+
+    // Deep content analysis using OpenAI
+    const isRelevant = await this.analyzeMessageRelevance(
+      messageContent,
+      state,
+    );
+
+    return hasRequiredKeywords && meetsLengthRequirement && isRelevant;
+  }
+
+  private async getNextStatePrompt(
+    conversationState: ConversationState,
+  ): Promise<string> {
+    const nextState = this.getNextState(conversationState.currentState);
+    if (!nextState) {
+      return "Thank you for sharing all of that with me. Would you like to hear my career recommendations based on our conversation?";
+    }
+
+    const statePrompts = {
+      [this.CONVERSATION_STATES.INTERESTS]:
+        "Now, I'd love to know more about what you're really good at. What skills or talents do you have that others notice?",
+      [this.CONVERSATION_STATES.SKILLS]:
+        "Thank you for sharing your skills! Could you tell me about any challenges you face or areas where you'd like to improve?",
+      [this.CONVERSATION_STATES.CHALLENGES]:
+        "I appreciate your honesty about challenges. Let's talk about your dreams - what kind of impact would you like to make in the world?",
+      [this.CONVERSATION_STATES.ASPIRATIONS]:
+        "Great! Let me analyze everything you've shared to provide some personalized career recommendations.",
+    };
+
+    return statePrompts[nextState] || "";
+  }
+
+  // This method now includes conversationId in its return type
   private async determineConversationState(
     conversation: any,
-  ): Promise<ConversationState> {
+  ): Promise<{ state: ConversationState; conversationId: number }> {
     const messages = conversation.Message;
     let currentState = await this.getStoredState(conversation.id);
 
@@ -270,6 +381,8 @@ export class CareerService {
       stateMessages,
     );
 
+    console.log("completed reached determineConversationState");
+
     // Determine if current state is complete and should move to next
     if (this.isStateComplete(currentState)) {
       currentState = await this.progressToNextState(
@@ -278,23 +391,34 @@ export class CareerService {
       );
     }
 
+    console.log("completed passed");
+
     // Store updated state
     await this.storeState(conversation.id, currentState);
 
-    return currentState;
+    console.log("currentState: ", currentState);
+    console.log("conversation.id: ", conversation.id);
+
+    return {
+      state: currentState,
+      conversationId: conversation.id,
+    };
   }
 
   private initializeState(): ConversationState {
     return {
       currentState: this.CONVERSATION_STATES.INITIAL,
-      stateData: Object.keys(this.CONVERSATION_STATES).reduce((acc, state) => {
-        acc[state] = {
-          completed: false,
-          data: null,
-          lastUpdated: new Date(),
-        };
-        return acc;
-      }, {}),
+      stateData: Object.values(this.CONVERSATION_STATES).reduce(
+        (acc, state) => {
+          acc[state] = {
+            completed: false,
+            data: null,
+            lastUpdated: new Date(),
+          };
+          return acc;
+        },
+        {},
+      ),
     };
   }
 
@@ -310,7 +434,10 @@ export class CareerService {
   private async storeState(conversationId: number, state: ConversationState) {
     await this.prisma.conversationState.upsert({
       where: { conversationId },
-      update: { stateData: JSON.stringify(state) },
+      update: {
+        stateData: JSON.stringify(state),
+        updatedAt: new Date(),
+      },
       create: {
         conversationId,
         stateData: JSON.stringify(state),
@@ -394,20 +521,19 @@ export class CareerService {
     message: string,
     state: string,
   ): Promise<boolean> {
-    const prompt = {
+    const prompt: ChatCompletionSystemMessageParam = {
       role: "system",
       content: `Analyze if the following message is a relevant and complete response for the '${state}' stage of a career counseling conversation. Consider: 1) Is it on topic? 2) Does it provide meaningful information? 3) Is it detailed enough? Respond with true or false only.`,
     };
 
-    const userMessage = {
+    const userMessage: ChatCompletionUserMessageParam = {
       role: "user",
       content: message,
     };
 
-    const response = await this.openAIService.generateResponse([
-      prompt,
-      userMessage,
-    ]);
+    const messages: ChatCompletionMessageParam[] = [prompt, userMessage];
+
+    const response = await this.openAIService.generateResponse(messages);
     return response.toLowerCase().includes("true");
   }
 
@@ -416,6 +542,7 @@ export class CareerService {
     return currentStateData && currentStateData.completed;
   }
 
+  // Update any methods that were using conversationState.conversationId
   private async progressToNextState(
     currentState: ConversationState,
     conversationId: number,
