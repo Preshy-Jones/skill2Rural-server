@@ -172,21 +172,21 @@ export class CareerService {
           gte: new Date(Date.now() - this.SESSION_TIMEOUT),
         },
       },
-      include: { Message: true },
+      include: { messages: true },
     });
 
     if (!conversation) {
       conversation = await this.prisma.conversation.create({
         data: {
           phoneNumber,
-          Message: {
+          messages: {
             create: {
               role: "system",
               content: `You are Rafiki, a friendly career counselor bot. You guide users through a conversation about their career interests and aspirations. You ask one question at a time and wait for responses. You maintain a warm, encouraging tone and provide specific examples to help users understand what you're asking.`,
             },
           },
         },
-        include: { Message: true },
+        include: { messages: true },
       });
     }
 
@@ -205,6 +205,11 @@ export class CareerService {
       conversation.id,
     );
 
+    let formattedConversationHistory =
+      this.formatMessagesForContext(conversationHistory);
+
+    console.log("formatted conversation history");
+
     // Format messages for OpenAI
     const messages: ChatCompletionMessageParam[] = [
       {
@@ -214,7 +219,7 @@ export class CareerService {
           conversationState.stateData,
         ),
       },
-      ...this.formatMessagesForContext(conversationHistory),
+      ...formattedConversationHistory,
       {
         role: "user",
         content: messageContent,
@@ -268,8 +273,8 @@ export class CareerService {
   private formatMessagesForContext(
     history: any[],
   ): ChatCompletionMessageParam[] {
-    // Only include the last 10 messages for context to avoid token limits
-    return history.slice(-10).map((msg) => ({
+    // Only include the last 20 messages for context to avoid token limits
+    return history.slice(-20).map((msg) => ({
       role: msg.role as "system" | "user" | "assistant",
       content: msg.content,
     }));
@@ -342,6 +347,8 @@ export class CareerService {
   private async getNextStatePrompt(
     conversationState: ConversationState,
   ): Promise<string> {
+    console.log("next state prompt ran", conversationState);
+
     const nextState = this.getNextState(conversationState.currentState);
     if (!nextState) {
       return "Thank you for sharing all of that with me. Would you like to hear my career recommendations based on our conversation?";
@@ -365,7 +372,7 @@ export class CareerService {
   private async determineConversationState(
     conversation: any,
   ): Promise<{ state: ConversationState; conversationId: number }> {
-    const messages = conversation.Message;
+    const messages = conversation.messages;
     let currentState = await this.getStoredState(conversation.id);
 
     if (!currentState) {
@@ -375,28 +382,31 @@ export class CareerService {
     // Get non-system messages grouped by state
     const stateMessages = this.groupMessagesByState(messages);
 
+    console.log("stateMessages: ", stateMessages);
+    console.log("currentState before analyzeAndUpdateState: ", currentState);
+
     // Update state data based on messages
     currentState = await this.analyzeAndUpdateState(
       currentState,
       stateMessages,
     );
 
-    console.log("completed reached determineConversationState");
+    console.log("currentState after analyzeAndUpdateState: ", currentState);
 
+    const isStateComplete = this.isStateComplete(currentState);
     // Determine if current state is complete and should move to next
-    if (this.isStateComplete(currentState)) {
+    if (isStateComplete) {
       currentState = await this.progressToNextState(
         currentState,
         conversation.id,
       );
     }
 
-    console.log("completed passed");
+    console.log("is state complete: ", isStateComplete);
 
     // Store updated state
     await this.storeState(conversation.id, currentState);
 
-    console.log("currentState: ", currentState);
     console.log("conversation.id: ", conversation.id);
 
     return {
@@ -450,6 +460,8 @@ export class CareerService {
     const stateMessages: { [key: string]: any[] } = {};
 
     let currentState = this.CONVERSATION_STATES.INITIAL;
+    console.log("nonSystemMessages: ", nonSystemMessages);
+
     nonSystemMessages.forEach((message) => {
       if (!stateMessages[currentState]) {
         stateMessages[currentState] = [];
@@ -474,6 +486,8 @@ export class CareerService {
     stateMessages: { [key: string]: any[] },
   ): Promise<ConversationState> {
     const updatedState = { ...currentState };
+
+    console.log("entries messages", Object.entries(stateMessages));
 
     for (const [state, messages] of Object.entries(stateMessages)) {
       const stateRequirements = this.STATE_REQUIREMENTS[state];
@@ -534,6 +548,9 @@ export class CareerService {
     const messages: ChatCompletionMessageParam[] = [prompt, userMessage];
 
     const response = await this.openAIService.generateResponse(messages);
+    console.log("state before analyzeMessageRelevance", state);
+    console.log("message relavance", response);
+
     return response.toLowerCase().includes("true");
   }
 
@@ -579,6 +596,40 @@ export class CareerService {
         content.includes(keyword),
       ) && content.length >= requirements.minMessageLength
     );
+  }
+
+  // async getConversationHistory(phoneNumber: string) {
+  //   return this.prisma.conversation.({
+  //     where: { phoneNumber },
+  //     include: {
+  //       Message: {
+  //         orderBy: { createdAt: "asc" },
+  //       },
+  //     },
+  //   });
+  // }
+
+  // async deleteConversation(phoneNumber: string) {
+  //   return this.prisma.conversation.delete({
+  //     where: { phoneNumber },
+  //   });
+  // }
+
+  private async cleanExpiredSessions(phoneNumber: string) {
+    const expiryDate = new Date(Date.now() - this.SESSION_TIMEOUT);
+
+    await this.prisma.conversation.updateMany({
+      where: {
+        isActive: true,
+        lastMessageAt: {
+          lt: expiryDate,
+        },
+        phoneNumber,
+      },
+      data: {
+        isActive: false,
+      },
+    });
   }
 
   private async generateStateBasedResponse(
@@ -632,39 +683,5 @@ Hint: What's your big idea for making things better? 🌍✨`,
     });
 
     return this.openAIService.generateResponse(messages);
-  }
-
-  // async getConversationHistory(phoneNumber: string) {
-  //   return this.prisma.conversation.({
-  //     where: { phoneNumber },
-  //     include: {
-  //       Message: {
-  //         orderBy: { createdAt: "asc" },
-  //       },
-  //     },
-  //   });
-  // }
-
-  // async deleteConversation(phoneNumber: string) {
-  //   return this.prisma.conversation.delete({
-  //     where: { phoneNumber },
-  //   });
-  // }
-
-  private async cleanExpiredSessions(phoneNumber: string) {
-    const expiryDate = new Date(Date.now() - this.SESSION_TIMEOUT);
-
-    await this.prisma.conversation.updateMany({
-      where: {
-        isActive: true,
-        lastMessageAt: {
-          lt: expiryDate,
-        },
-        phoneNumber,
-      },
-      data: {
-        isActive: false,
-      },
-    });
   }
 }
