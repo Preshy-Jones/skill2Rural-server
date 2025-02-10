@@ -310,7 +310,8 @@ export class CareerService {
       console.log("completed reached: shouldMoveToNextState if isCompleted");
 
       // Update state completion status
-      currentStateData.completed = true;
+      conversationState.stateData[conversationState.currentState].completed =
+        true;
       console.log("completed passed: shouldMoveToNextState if isCompleted");
       await this.storeState(conversationId, conversationState);
       return true;
