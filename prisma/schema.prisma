@@ -184,7 +184,7 @@ model Conversation {
  createdAt    DateTime @default(now())
  lastMessageAt DateTime @updatedAt
  isActive     Boolean  @default(true)
- Message Message[]
+ messages Message[]
 
  ConversationState ConversationState[]
 

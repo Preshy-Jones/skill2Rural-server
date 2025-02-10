@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { Conversation, Message, Prisma } from '@prisma/client';
-import { PrismaService } from 'src/prisma.service';
+import { Injectable } from "@nestjs/common";
+import {  Message, Prisma } from "@prisma/client";
+import { PrismaService } from "src/prisma.service";
 
 @Injectable()
 export class MessageRepository {
