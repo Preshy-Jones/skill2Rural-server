@@ -21,6 +21,7 @@ model User {
   profile_photo                     String?
   createdAt                         DateTime         @default(now())
   updatedAt                         DateTime         @updatedAt
+  role                              String?
   CourseProgress                    CourseProgress[]
   CourseReview                      CourseReview[]
   Quiz                              Quiz[]
