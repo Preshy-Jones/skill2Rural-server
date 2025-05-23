@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsStrongPassword,
   Matches,
   MaxLength,
   MinLength,
@@ -43,10 +44,13 @@ export class CreateUserDto {
   @IsString()
   @MinLength(8)
   @MaxLength(30)
-  @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/, {
-    message:
-      "Password too weak, it must contain a number, lowercase and uppercase letter and a special character",
-  })
+  @IsStrongPassword(
+    {},
+    {
+      message:
+        "Password too weak, it must contain a number, lowercase and uppercase letter and a special character",
+    },
+  )
   password: string;
 
   @ApiProperty({
