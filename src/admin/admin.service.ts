@@ -936,18 +936,21 @@ export class AdminService {
       //     HttpStatus.BAD_REQUEST,
       //   );
       // }
-      const duration = await this.getVideoDuration(
-        files.course_video[0].buffer,
-      );
+
+      let duration = null;
+      let uploadedCourseVideo = null;
+      if (files?.course_video) {
+        duration = await this.getVideoDuration(files.course_video[0].buffer);
+
+        uploadedCourseVideo = await this.uploadService.s3UploadFile(
+          files.course_video[0],
+          "videos",
+        );
+      }
 
       const uploadedThumbnail = await this.uploadService.s3UploadFile(
         files.thumbnail_image[0],
         "thumbnails",
-      );
-
-      const uploadedCourseVideo = await this.uploadService.s3UploadFile(
-        files.course_video[0],
-        "videos",
       );
 
       //create course
@@ -955,7 +958,7 @@ export class AdminService {
         title,
         description,
         thumbnail_image: uploadedThumbnail.fileUrl,
-        video_url: uploadedCourseVideo.fileUrl,
+        video_url: uploadedCourseVideo?.fileUrl || null,
         duration,
         publishedBy: {
           connect: {

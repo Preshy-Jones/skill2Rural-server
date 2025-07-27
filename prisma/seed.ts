@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import * as bcrypt from "bcryptjs";
 
 const answerMapping = {
   A: 0,
@@ -21,6 +22,16 @@ interface Course {
   duration: number;
   thumbnail_image?: string;
 }
+
+// Admin user data
+const adminData = {
+  name: "Admin User",
+  email: "admin@skill2rural.com",
+  password: "Admin@123",
+  status: "ACTIVE" as const,
+  profile_photo: null,
+};
+
 const courses: Course[] = [
   {
     title: "DESIGN THINKING",
@@ -495,16 +506,26 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Seeding database");
 
-  //seed courses and questions
-  // {
-  //   title: course.title,
-  //   description: course.description,
-  //   objectives: course.objectives,
-  //   video_url: course.video_url,
-  //   duration: 3633,
-  //   thumbnail_image:
-  //     "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Big_Buck_Bunny_thumbnail_vlc.png/1200px-Big_Buck_Bunny_thumbnail_vlc.png",
-  // }
+  // Seed admin user
+  console.log("Seeding admin user...");
+  const hashedPassword = await bcrypt.hash(adminData.password, 10);
+
+  const admin = await prisma.admin.upsert({
+    where: { email: adminData.email },
+    update: {},
+    create: {
+      name: adminData.name,
+      email: adminData.email,
+      password: hashedPassword,
+      status: adminData.status,
+      profile_photo: adminData.profile_photo,
+    },
+  });
+
+  console.log(`Admin user created/updated: ${admin.email}`);
+
+  // // Seed courses and questions
+  // console.log("Seeding courses and questions...");
 
   // const coursesData = await Promise.all(
   //   courses.map(async (course) => {
@@ -518,9 +539,10 @@ async function main() {
   //         thumbnail_image: course.thumbnail_image,
   //       },
   //     });
-  //     const questionsData = await Promise.all(
+
+  //     await Promise.all(
   //       course.questions.map(async (question) => {
-  //         const questionData = await prisma.courseQuestion.create({
+  //         await prisma.courseQuestion.create({
   //           data: {
   //             question: question.question,
   //             options: question.options,
@@ -533,13 +555,15 @@ async function main() {
   //             },
   //           },
   //         });
-  //         return questionData;
   //       }),
   //     );
   //     return courseData;
   //   }),
   // );
+
+  // console.log(`Created ${coursesData.length} courses with questions`);
 }
+
 main()
   .then(async () => {
     await prisma.$disconnect();

@@ -60,7 +60,7 @@ model Course {
   video_url   String?
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
-  duration    Int
+  duration    Int?
   objectives  String[]
   reviews     CourseReview[]
   progress    CourseProgress[]
